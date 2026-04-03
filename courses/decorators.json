@@ -1,0 +1,83 @@
+{
+  "id": "decorators",
+  "title": "装饰器",
+  "description": "学习 Python 装饰器，理解闭包和高阶函数的概念。",
+  "lessons": [
+    {
+      "id": "decorators_01",
+      "title": "函数也是对象",
+      "explanation": "在 Python 中，函数是一等公民（first-class object）。函数可以赋值给变量、作为参数传递、作为返回值返回。\n\n理解这一点是掌握装饰器的基础。",
+      "code_example": "def greet(name):\n    return '你好，' + name\n\n# 函数赋值给变量\nsay_hello = greet\nprint(say_hello('小明'))\n\n# 函数作为参数\ndef call_func(func, arg):\n    return func(arg)\n\nprint(call_func(greet, '小红'))",
+      "key_points": [
+        "函数可以赋值给变量",
+        "函数可以作为参数传递",
+        "函数可以作为返回值"
+      ]
+    },
+    {
+      "id": "decorators_02",
+      "title": "闭包",
+      "explanation": "闭包是一个函数，它记住了创建时的外部变量。\n\n当一个内部函数引用了外部函数的变量，且被返回时，就形成了闭包。",
+      "code_example": "def make_multiplier(factor):\n    def multiply(x):\n        return x * factor\n    return multiply\n\ndouble = make_multiplier(2)\ntriple = make_multiplier(3)\n\nprint(double(5))\nprint(triple(5))",
+      "key_points": [
+        "闭包是记住了外部变量的函数",
+        "内部函数可以访问外部函数的局部变量",
+        "闭包常用于创建有状态的函数"
+      ]
+    },
+    {
+      "id": "decorators_03",
+      "title": "装饰器基础",
+      "explanation": "装饰器本质上是一个接受函数并返回新函数的函数。它可以在不修改原函数代码的情况下，给函数添加新功能。\n\n使用 `@装饰器名` 语法糖来应用装饰器。",
+      "code_example": "import time\n\ndef timer(func):\n    def wrapper(*args, **kwargs):\n        start = time.time()\n        result = func(*args, **kwargs)\n        end = time.time()\n        print('{} 耗时: {:.4f}秒'.format(func.__name__, end - start))\n        return result\n    return wrapper\n\n@timer\ndef slow_function():\n    total = 0\n    for i in range(1000000):\n        total += i\n    return total\n\nresult = slow_function()\nprint('结果:', result)",
+      "key_points": [
+        "装饰器接收函数、返回函数",
+        "@语法糖等价于 func = decorator(func)",
+        "使用 *args, **kwargs 使装饰器通用"
+      ]
+    },
+    {
+      "id": "decorators_04",
+      "title": "带参数的装饰器",
+      "explanation": "装饰器本身也可以接收参数。这时需要三层嵌套函数：最外层接收装饰器参数，中间层接收函数，最内层是实际的包装器。",
+      "code_example": "def repeat(times):\n    def decorator(func):\n        def wrapper(*args, **kwargs):\n            for _ in range(times):\n                result = func(*args, **kwargs)\n            return result\n        return wrapper\n    return decorator\n\n@repeat(3)\ndef say_hello(name):\n    print('你好，{}!'.format(name))\n\nsay_hello('小明')",
+      "key_points": [
+        "带参数的装饰器需要三层嵌套",
+        "最外层函数接收装饰器参数",
+        "最内层函数是实际的包装器"
+      ]
+    }
+  ],
+  "exercises": [
+    {
+      "id": "decorators_ex_01",
+      "title": "编写日志装饰器",
+      "description": "定义一个装饰器 `log`，它在被装饰的函数执行前后各打印一条日志。\n格式：\n- 执行前：`调用函数: {函数名}`\n- 执行后：`函数 {函数名} 返回: {返回值}`",
+      "difficulty": "medium",
+      "starter_code": "def log(func):\n    # 在这里实现装饰器\n    pass\n\n@log\ndef add(a, b):\n    return a + b\n\nadd(3, 5)",
+      "test_cases": [
+        {
+          "input": [],
+          "expected_output": "调用函数: add",
+          "match_mode": "contains"
+        }
+      ],
+      "solution": "def log(func):\n    def wrapper(*args, **kwargs):\n        print('调用函数: {}'.format(func.__name__))\n        result = func(*args, **kwargs)\n        print('函数 {} 返回: {}'.format(func.__name__, result))\n        return result\n    return wrapper\n\n@log\ndef add(a, b):\n    return a + b\n\nadd(3, 5)"
+    },
+    {
+      "id": "decorators_ex_02",
+      "title": "编写缓存装饰器",
+      "description": "定义一个装饰器 `cache`，它缓存函数的计算结果。\n如果用相同参数再次调用，直接返回缓存的结果（不重复计算）。\n缓存命中时打印 `缓存命中: {参数}`。",
+      "difficulty": "hard",
+      "starter_code": "def cache(func):\n    # 在这里实现装饰器\n    pass\n\n@cache\ndef square(n):\n    print('计算中...')\n    return n * n\n\nprint(square(4))\nprint(square(4))",
+      "test_cases": [
+        {
+          "input": [],
+          "expected_output": "缓存命中",
+          "match_mode": "contains"
+        }
+      ],
+      "solution": "def cache(func):\n    memo = {}\n    def wrapper(*args):\n        if args in memo:\n            print('缓存命中: {}'.format(args))\n            return memo[args]\n        result = func(*args)\n        memo[args] = result\n        return result\n    return wrapper\n\n@cache\ndef square(n):\n    print('计算中...')\n    return n * n\n\nprint(square(4))\nprint(square(4))"
+    }
+  ]
+}

@@ -1,0 +1,87 @@
+{
+  "id": "variables",
+  "title": "变量与赋值",
+  "description": "学习 Python 中的变量概念和赋值操作，这是编程的第一步。",
+  "lessons": [
+    {
+      "id": "variables_01",
+      "title": "什么是变量",
+      "explanation": "变量是用于存储数据的容器。在 Python 中，你不需要提前声明变量的类型，直接赋值即可创建变量。\n\n变量名可以包含字母、数字和下划线，但不能以数字开头。Python 是大小写敏感的，`name` 和 `Name` 是两个不同的变量。",
+      "code_example": "name = \"小明\"\nage = 25\nprint(name)\nprint(age)",
+      "key_points": [
+        "变量不需要声明类型",
+        "使用 = 进行赋值",
+        "变量名区分大小写"
+      ]
+    },
+    {
+      "id": "variables_02",
+      "title": "变量的重新赋值",
+      "explanation": "变量的值可以随时改变。当你给一个已存在的变量赋予新值时，旧值会被覆盖。\n\nPython 是动态类型语言，同一个变量可以先后存储不同类型的值。",
+      "code_example": "x = 10\nprint(x)\nx = \"你好\"\nprint(x)",
+      "key_points": [
+        "变量可以被重新赋值",
+        "Python 是动态类型语言",
+        "同一个变量可以存储不同类型的值"
+      ]
+    },
+    {
+      "id": "variables_03",
+      "title": "多变量赋值",
+      "explanation": "Python 支持同时给多个变量赋值，这在交换变量值或解包数据时非常有用。",
+      "code_example": "a, b, c = 1, 2, 3\nprint(a, b, c)\n\n# 交换两个变量的值\na, b = b, a\nprint(a, b)",
+      "key_points": [
+        "可以用逗号分隔同时赋值多个变量",
+        "Pythonic 的变量交换不需要临时变量",
+        "解包时左右两边的变量数量必须一致"
+      ]
+    }
+  ],
+  "exercises": [
+    {
+      "id": "variables_ex_01",
+      "title": "创建你的第一个变量",
+      "description": "创建一个名为 `age` 的变量，赋值为 25，然后打印它。",
+      "difficulty": "easy",
+      "starter_code": "# 在这里写你的代码\n",
+      "test_cases": [
+        {
+          "input": [],
+          "expected_output": "25\n",
+          "match_mode": "exact"
+        }
+      ],
+      "solution": "age = 25\nprint(age)"
+    },
+    {
+      "id": "variables_ex_02",
+      "title": "变量交换",
+      "description": "有两个变量 `a = 10` 和 `b = 20`，请交换它们的值，然后按 `a b` 的顺序打印（用空格分隔）。",
+      "difficulty": "easy",
+      "starter_code": "a = 10\nb = 20\n# 交换 a 和 b 的值\n\nprint(a, b)",
+      "test_cases": [
+        {
+          "input": [],
+          "expected_output": "20 10\n",
+          "match_mode": "exact"
+        }
+      ],
+      "solution": "a = 10\nb = 20\na, b = b, a\nprint(a, b)"
+    },
+    {
+      "id": "variables_ex_03",
+      "title": "计算圆的面积",
+      "description": "给定半径 `radius = 5`，请计算圆的面积并打印结果（使用 3.14159 作为 π 的近似值）。提示：面积 = π × 半径²。",
+      "difficulty": "medium",
+      "starter_code": "radius = 5\npi = 3.14159\n# 计算面积\n\nprint(area)",
+      "test_cases": [
+        {
+          "input": [],
+          "expected_output": "78.53975\n",
+          "match_mode": "exact"
+        }
+      ],
+      "solution": "radius = 5\npi = 3.14159\narea = pi * radius ** 2\nprint(area)"
+    }
+  ]
+}

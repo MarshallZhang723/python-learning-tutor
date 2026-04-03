@@ -1,0 +1,98 @@
+{
+  "id": "data_types",
+  "title": "数据类型",
+  "description": "了解 Python 中的基本数据类型：字符串、数字、列表、字典等。",
+  "lessons": [
+    {
+      "id": "data_types_01",
+      "title": "字符串基础",
+      "explanation": "字符串是 Python 中最常用的数据类型之一。你可以用单引号或双引号来创建字符串。\n\n字符串支持很多操作：拼接（+）、重复（*）、索引（[]）、切片（[:]）等。",
+      "code_example": "s1 = '你好'\ns2 = \"世界\"\nprint(s1 + s2)\nprint(s1 * 3)\nprint(s1[0])\nprint(s1[0:1])",
+      "key_points": [
+        "字符串可以用单引号或双引号定义",
+        "用 + 拼接，用 * 重复",
+        "可以通过索引访问单个字符（从 0 开始）"
+      ]
+    },
+    {
+      "id": "data_types_02",
+      "title": "列表",
+      "explanation": "列表是 Python 中最常用的数据结构，可以存储任意类型的元素，且支持修改。\n\n列表用方括号 `[]` 创建，元素之间用逗号分隔。",
+      "code_example": "fruits = ['苹果', '香蕉', '橙子']\nprint(fruits[0])\nfruits.append('葡萄')\nprint(fruits)\nprint(len(fruits))\nprint('苹果' in fruits)",
+      "key_points": [
+        "列表可以存储不同类型的元素",
+        "append() 添加元素，len() 获取长度",
+        "用 in 检查元素是否存在"
+      ]
+    },
+    {
+      "id": "data_types_03",
+      "title": "字典",
+      "explanation": "字典是键值对的集合，用花括号 `{}` 创建。每个键必须唯一，值可以是任意类型。\n\n字典非常适合用来表示有结构的数据。",
+      "code_example": "student = {\n    'name': '小明',\n    'age': 20,\n    'scores': [90, 85, 92]\n}\nprint(student['name'])\nprint(student['scores'][0])\nstudent['city'] = '北京'\nprint(student)",
+      "key_points": [
+        "字典用花括号创建，键值对用冒号分隔",
+        "用 [] 访问和添加键值对",
+        "键必须是不可变类型（字符串、数字、元组）"
+      ]
+    },
+    {
+      "id": "data_types_04",
+      "title": "类型转换",
+      "explanation": "Python 提供了内置函数来进行类型转换：`int()`、`float()`、`str()` 等。\n\n类型转换在处理用户输入和数据处理时非常常用。",
+      "code_example": "x = '42'\nprint(type(x))\nprint(int(x) + 8)\nprint(float(x))\nprint(str(3.14))\nprint(list('hello'))",
+      "key_points": [
+        "int() 转整数，float() 转浮点数，str() 转字符串",
+        "list() 可以将字符串转为字符列表",
+        "类型转换失败会抛出 ValueError"
+      ]
+    }
+  ],
+  "exercises": [
+    {
+      "id": "data_types_ex_01",
+      "title": "字符串反转",
+      "description": "给定一个字符串 `s = 'Python'`，请反转它并打印结果。",
+      "difficulty": "easy",
+      "starter_code": "s = 'Python'\n# 反转字符串\n\nprint(reversed_s)",
+      "test_cases": [
+        {
+          "input": [],
+          "expected_output": "nohtyP\n",
+          "match_mode": "exact"
+        }
+      ],
+      "solution": "s = 'Python'\nreversed_s = s[::-1]\nprint(reversed_s)"
+    },
+    {
+      "id": "data_types_ex_02",
+      "title": "列表求和",
+      "description": "给定一个列表 `numbers = [1, 2, 3, 4, 5]`，请计算所有元素的和并打印结果。",
+      "difficulty": "easy",
+      "starter_code": "numbers = [1, 2, 3, 4, 5]\n# 计算和\n\nprint(total)",
+      "test_cases": [
+        {
+          "input": [],
+          "expected_output": "15\n",
+          "match_mode": "exact"
+        }
+      ],
+      "solution": "numbers = [1, 2, 3, 4, 5]\ntotal = sum(numbers)\nprint(total)"
+    },
+    {
+      "id": "data_types_ex_03",
+      "title": "字典统计",
+      "description": "给定一个字符串 `s = 'hello'`，请统计每个字符出现的次数，存储为字典并打印结果。\n提示：遍历字符串，用字典计数。",
+      "difficulty": "medium",
+      "starter_code": "s = 'hello'\ncounts = {}\n# 统计每个字符的出现次数\n\nprint(counts)",
+      "test_cases": [
+        {
+          "input": [],
+          "expected_output": "{'h': 1, 'e': 1, 'l': 2, 'o': 1}\n",
+          "match_mode": "contains"
+        }
+      ],
+      "solution": "s = 'hello'\ncounts = {}\nfor ch in s:\n    counts[ch] = counts.get(ch, 0) + 1\nprint(counts)"
+    }
+  ]
+}

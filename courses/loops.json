@@ -1,0 +1,87 @@
+{
+  "id": "loops",
+  "title": "循环",
+  "description": "掌握 for 和 while 循环，学会用循环处理重复任务。",
+  "lessons": [
+    {
+      "id": "loops_01",
+      "title": "for 循环",
+      "explanation": "for 循环用于遍历一个序列（如列表、字符串、range）。这是 Python 中最常用的循环方式。\n\n`range(n)` 生成从 0 到 n-1 的整数序列。",
+      "code_example": "for i in range(5):\n    print(i)\n\nfor ch in 'Python':\n    print(ch, end=' ')\nprint()",
+      "key_points": [
+        "for 循环遍历序列中的每个元素",
+        "range(n) 生成 0 到 n-1",
+        "range(start, stop, step) 支持起始值和步长"
+      ]
+    },
+    {
+      "id": "loops_02",
+      "title": "while 循环",
+      "explanation": "while 循环在条件为 True 时反复执行。适合不知道循环次数的情况。\n\n注意：要确保循环条件最终会变为 False，否则会成为无限循环。",
+      "code_example": "count = 0\nwhile count < 5:\n    print(count)\n    count += 1",
+      "key_points": [
+        "while 循环在条件为真时执行",
+        "必须确保循环条件最终变为 False",
+        "可以用 break 提前退出循环"
+      ]
+    },
+    {
+      "id": "loops_03",
+      "title": "列表推导式",
+      "explanation": "列表推导式是 Python 特有的简洁写法，可以在一行中创建新列表。\n\n语法：`[表达式 for 变量 in 序列 if 条件]`",
+      "code_example": "squares = [x**2 for x in range(10)]\nprint(squares)\n\nevens = [x for x in range(20) if x % 2 == 0]\nprint(evens)",
+      "key_points": [
+        "列表推导式比普通循环更简洁",
+        "可以加 if 条件进行过滤",
+        "适合简单的转换和过滤操作"
+      ]
+    }
+  ],
+  "exercises": [
+    {
+      "id": "loops_ex_01",
+      "title": "打印九九乘法表",
+      "description": "使用嵌套 for 循环打印九九乘法表。每行格式为 `1x1=1 1x2=2 ...`。",
+      "difficulty": "medium",
+      "starter_code": "# 打印九九乘法表\n",
+      "test_cases": [
+        {
+          "input": [],
+          "expected_output": "1x1=1\n1x2=2 2x2=4\n1x3=3 2x3=6 3x3=9\n",
+          "match_mode": "contains"
+        }
+      ],
+      "solution": "for i in range(1, 10):\n    for j in range(1, i + 1):\n        print('{}x{}={}'.format(j, i, j*i), end=' ')\n    print()"
+    },
+    {
+      "id": "loops_ex_02",
+      "title": "斐波那契数列",
+      "description": "打印前 10 个斐波那契数列的值（从 0 开始），用空格分隔。\n提示：每个数是前两个数之和。",
+      "difficulty": "medium",
+      "starter_code": "# 打印前 10 个斐波那契数\n",
+      "test_cases": [
+        {
+          "input": [],
+          "expected_output": "0 1 1 2 3 5 8 13 21 34",
+          "match_mode": "contains"
+        }
+      ],
+      "solution": "a, b = 0, 1\nresult = []\nfor _ in range(10):\n    result.append(str(a))\n    a, b = b, a + b\nprint(' '.join(result))"
+    },
+    {
+      "id": "loops_ex_03",
+      "title": "过滤奇数",
+      "description": "给定 `numbers = list(range(20))`，使用列表推导式筛选出所有奇数并打印。",
+      "difficulty": "easy",
+      "starter_code": "numbers = list(range(20))\n# 用列表推导式筛选奇数\n\nprint(odds)",
+      "test_cases": [
+        {
+          "input": [],
+          "expected_output": "[1, 3, 5, 7, 9, 11, 13, 15, 17, 19]\n",
+          "match_mode": "exact"
+        }
+      ],
+      "solution": "numbers = list(range(20))\nodds = [x for x in numbers if x % 2 != 0]\nprint(odds)"
+    }
+  ]
+}

@@ -1,0 +1,108 @@
+{
+  "id": "functions",
+  "title": "函数",
+  "description": "学习如何定义和调用函数，掌握参数、返回值和作用域。",
+  "lessons": [
+    {
+      "id": "functions_01",
+      "title": "定义函数",
+      "explanation": "函数是一段可重复使用的代码块，用 `def` 关键字定义。\n\n函数可以接收参数，并用 `return` 返回结果。如果没有 return 语句，函数返回 None。",
+      "code_example": "def greet(name):\n    return '你好，' + name + '！'\n\nprint(greet('小明'))\nprint(greet('小红'))",
+      "key_points": [
+        "用 def 关键字定义函数",
+        "参数写在括号里",
+        "return 返回结果，没有 return 则返回 None"
+      ]
+    },
+    {
+      "id": "functions_02",
+      "title": "默认参数和关键字参数",
+      "explanation": "函数参数可以有默认值，调用时可以省略有默认值的参数。\n\n关键字参数允许你按名字传参，不必关心顺序。",
+      "code_example": "def power(base, exp=2):\n    return base ** exp\n\nprint(power(3))\nprint(power(3, 3))\nprint(power(exp=4, base=2))",
+      "key_points": [
+        "默认参数在定义时赋值",
+        "有默认值的参数必须放在无默认值参数之后",
+        "关键字参数可以不按顺序传参"
+      ]
+    },
+    {
+      "id": "functions_03",
+      "title": "*args 和 **kwargs",
+      "explanation": "`*args` 接收任意数量的位置参数（元组），`**kwargs` 接收任意数量的关键字参数（字典）。\n\n这在编写灵活的函数时非常有用。",
+      "code_example": "def add_all(*args):\n    return sum(args)\n\nprint(add_all(1, 2, 3))\nprint(add_all(10, 20, 30, 40))\n\ndef print_info(**kwargs):\n    for key, value in kwargs.items():\n        print('{}: {}'.format(key, value))\n\nprint_info(name='小明', age=20)",
+      "key_points": [
+        "*args 收集位置参数为元组",
+        "**kwargs 收集关键字参数为字典",
+        "可以同时使用，但顺序必须是：普通参数、*args、**kwargs"
+      ]
+    }
+  ],
+  "exercises": [
+    {
+      "id": "functions_ex_01",
+      "title": "计算阶乘",
+      "description": "定义一个函数 `factorial(n)`，返回 n 的阶乘（n!）。\n提示：0! = 1，n! = n × (n-1)!",
+      "difficulty": "easy",
+      "starter_code": "def factorial(n):\n    # 在这里实现\n    pass\n\nprint(factorial(5))\nprint(factorial(0))",
+      "test_cases": [
+        {
+          "function_name": "factorial",
+          "input": [5],
+          "expected_output": "120\n"
+        },
+        {
+          "function_name": "factorial",
+          "input": [0],
+          "expected_output": "1\n"
+        },
+        {
+          "function_name": "factorial",
+          "input": [10],
+          "expected_output": "3628800\n"
+        }
+      ],
+      "solution": "def factorial(n):\n    if n <= 1:\n        return 1\n    return n * factorial(n - 1)\n\nprint(factorial(5))\nprint(factorial(0))"
+    },
+    {
+      "id": "functions_ex_02",
+      "title": "回文检测",
+      "description": "定义一个函数 `is_palindrome(s)`，判断字符串是否是回文（忽略大小写），返回 True 或 False。",
+      "difficulty": "easy",
+      "starter_code": "def is_palindrome(s):\n    # 在这里实现\n    pass\n\nprint(is_palindrome('racecar'))\nprint(is_palindrome('hello'))",
+      "test_cases": [
+        {
+          "function_name": "is_palindrome",
+          "input": ["racecar"],
+          "expected_output": "True\n"
+        },
+        {
+          "function_name": "is_palindrome",
+          "input": ["hello"],
+          "expected_output": "False\n"
+        },
+        {
+          "function_name": "is_palindrome",
+          "input": ["Racecar"],
+          "expected_output": "True\n"
+        }
+      ],
+      "solution": "def is_palindrome(s):\n    s = s.lower()\n    return s == s[::-1]\n\nprint(is_palindrome('racecar'))\nprint(is_palindrome('hello'))"
+    },
+    {
+      "id": "functions_ex_03",
+      "title": "FizzBuzz",
+      "description": "定义函数 `fizzbuzz(n)`，对 1 到 n 的每个数字：\n- 能被 3 整除打印 'Fizz'\n- 能被 5 整除打印 'Buzz'\n- 都能整除打印 'FizzBuzz'\n- 其他打印数字本身\n每项占一行。",
+      "difficulty": "medium",
+      "starter_code": "def fizzbuzz(n):\n    # 在这里实现\n    pass\n\nfizzbuzz(15)",
+      "test_cases": [
+        {
+          "function_name": "fizzbuzz",
+          "input": [15],
+          "expected_output": "Buzz",
+          "match_mode": "contains"
+        }
+      ],
+      "solution": "def fizzbuzz(n):\n    for i in range(1, n + 1):\n        if i % 15 == 0:\n            print('FizzBuzz')\n        elif i % 3 == 0:\n            print('Fizz')\n        elif i % 5 == 0:\n            print('Buzz')\n        else:\n            print(i)\n\nfizzbuzz(15)"
+    }
+  ]
+}
