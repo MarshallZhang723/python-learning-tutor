@@ -445,67 +445,148 @@ def welcome_page():
             st.rerun()
 
 
+def _find_resume_position(courses, progress):
+    """Find the first unlearned lesson across all courses. Returns (course_index, lesson_index)."""
+    completed = set(progress.get("completed_lessons", []))
+    for ci, c in enumerate(courses):
+        course = load_course(c["id"])
+        if not course:
+            continue
+        for li, lesson in enumerate(course.get("lessons", [])):
+            if lesson["id"] not in completed:
+                return ci, li
+    # All completed — start from the end
+    last_ci = len(courses) - 1
+    last_course = load_course(courses[last_ci]["id"])
+    last_li = max(0, len(last_course.get("lessons", [])) - 1) if last_course else 0
+    return last_ci, last_li
+
+
 def lesson_page():
     _inject_css()
-
-    st.markdown(
-        '<h1 class="page-title">学习</h1>'
-        '<p class="page-desc">选择课程和章节，开始你的 Python 之旅。</p>',
-        unsafe_allow_html=True,
-    )
 
     courses = list_courses()
     if not courses:
         st.warning("暂无课程内容")
         return
 
-    course_options = {c["title"]: c["id"] for c in courses}
-    selected_title = st.selectbox("选择课程", list(course_options.keys()))
-    course_id = course_options[selected_title]
+    # Initialize session state for linear navigation
+    if "lesson_ci" not in st.session_state:
+        progress = load_progress()
+        ci, li = _find_resume_position(courses, progress)
+        st.session_state["lesson_ci"] = ci
+        st.session_state["lesson_li"] = li
 
+    ci = st.session_state["lesson_ci"]
+    li = st.session_state["lesson_li"]
+
+    # Clamp indices
+    ci = max(0, min(ci, len(courses) - 1))
+    course_id = courses[ci]["id"]
     course = load_course(course_id)
     if not course:
-        st.error("无法加载课程: {}".format(course_id))
+        st.error("无法加载课程")
         return
 
-    st.markdown(
-        '<p style="color:var(--gray-2);font-size:0.92rem;margin-bottom:1.5rem;">{}</p>'.format(
-            course["description"]
-        ),
-        unsafe_allow_html=True,
-    )
-
     lessons = course.get("lessons", [])
-    lesson_titles = {l["title"]: l["id"] for l in lessons}
-
     if not lessons:
         st.warning("该课程暂无内容")
         return
 
-    selected_lesson_title = st.selectbox("选择章节", list(lesson_titles.keys()))
-    lesson_id = lesson_titles[selected_lesson_title]
+    li = max(0, min(li, len(lessons) - 1))
+    lesson = lessons[li]
+    total = len(lessons)
 
-    lesson = get_lesson(course_id, lesson_id)
-    if not lesson:
-        st.error("无法加载章节")
-        return
+    # ── Progress bar ──
+    progress_pct = int((li + 1) / total * 100)
+    st.markdown(
+        '<div style="display:flex;align-items:center;gap:1rem;margin-bottom:0.3rem;">'
+        '<div style="flex:1;height:4px;background:var(--gray-5);border-radius:2px;overflow:hidden;">'
+        '<div style="width:{}%;height:100%;background:var(--blue);border-radius:2px;transition:width 0.4s ease;"></div>'
+        '</div>'
+        '<span style="font-size:0.78rem;color:var(--gray-2);font-weight:500;white-space:nowrap;">{} / {}</span>'
+        '</div>'.format(progress_pct, li + 1, total),
+        unsafe_allow_html=True,
+    )
 
+    # ── Course title + lesson number ──
+    st.markdown(
+        '<p style="font-size:0.8rem;color:var(--gray-2);font-weight:500;margin:0.5rem 0 0 0;text-transform:uppercase;letter-spacing:0.06em;">{}</p>'.format(
+            course["title"]
+        ),
+        unsafe_allow_html=True,
+    )
+
+    # ── Lesson content ──
     example_code = lesson_card(lesson)
 
+    # ── Run example button ──
     if example_code:
-        c1, c2 = st.columns([1, 1])
-        with c1:
-            if st.button("运行示例代码", key="run_example"):
+        run_col, _ = st.columns([1, 3])
+        with run_col:
+            if st.button("▶  运行示例", key="run_example"):
                 with st.spinner("运行中..."):
                     result = execute_code(example_code)
                     st.session_state["last_run_result"] = result
-        with c2:
-            if st.button("标记为已学", key="mark_learned"):
-                mark_lesson_complete(lesson_id)
-                st.success("已标记「{}」为已学！".format(lesson["title"]))
 
     if "last_run_result" in st.session_state:
         output_panel(st.session_state["last_run_result"])
+
+    # ── Mark as learned (auto on viewing, or manual) ──
+    progress_data = load_progress()
+    is_learned = lesson["id"] in progress_data.get("completed_lessons", [])
+
+    if not is_learned:
+        if st.button("标记为已学", key="mark_learned", type="primary"):
+            mark_lesson_complete(lesson["id"])
+            st.rerun()
+    else:
+        st.markdown(
+            '<div style="display:flex;align-items:center;gap:0.5rem;margin:0.5rem 0;color:var(--green);font-size:0.88rem;font-weight:500;">'
+            '<span>&#10003;</span> 已完成</div>',
+            unsafe_allow_html=True,
+        )
+
+    # ── Bottom navigation ──
+    st.markdown('<hr class="apple-hr">', unsafe_allow_html=True)
+
+    has_prev = li > 0 or ci > 0
+    is_last_lesson = (ci == len(courses) - 1) and (li == len(lessons) - 1)
+    is_last_in_course = li == len(lessons) - 1
+
+    nav_l, nav_r = st.columns(2)
+    with nav_l:
+        if has_prev:
+            if st.button("←  上一节", key="prev_lesson", use_container_width=True):
+                st.session_state["last_run_result"] = None
+                if li > 0:
+                    st.session_state["lesson_li"] = li - 1
+                else:
+                    st.session_state["lesson_ci"] = ci - 1
+                    prev_course = load_course(courses[ci - 1]["id"])
+                    if prev_course:
+                        st.session_state["lesson_li"] = len(prev_course.get("lessons", [])) - 1
+                st.rerun()
+    with nav_r:
+        if not is_last_lesson:
+            if is_last_in_course:
+                btn_label = "进入下一课程  →"
+            else:
+                btn_label = "下一节  →"
+            if st.button(btn_label, key="next_lesson", type="primary", use_container_width=True):
+                st.session_state["last_run_result"] = None
+                if not is_last_in_course:
+                    st.session_state["lesson_li"] = li + 1
+                else:
+                    st.session_state["lesson_ci"] = ci + 1
+                    st.session_state["lesson_li"] = 0
+                st.rerun()
+        else:
+            st.markdown(
+                '<div style="text-align:center;padding:0.6rem;color:var(--gray-2);font-size:0.88rem;">'
+                '所有课程已完成</div>',
+                unsafe_allow_html=True,
+            )
 
 
 def practice_page():
