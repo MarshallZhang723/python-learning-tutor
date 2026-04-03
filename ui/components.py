@@ -35,50 +35,86 @@ def output_panel(result):
 
 def lesson_card(lesson):
     """Render a lesson card with title, explanation, code example, and key points."""
-    st.subheader(lesson["title"])
+    st.markdown(
+        '<div class="card">',
+        unsafe_allow_html=True,
+    )
+
+    st.markdown(
+        '<h2 style="font-size:1.5rem;font-weight:700;color:#1d1d1f;margin-top:0;">{}</h2>'.format(
+            lesson["title"]
+        ),
+        unsafe_allow_html=True,
+    )
+
     st.markdown(lesson["explanation"])
 
     if lesson.get("key_points"):
-        st.markdown("**要点：**")
+        st.markdown('<div style="margin-top:0.8rem;">', unsafe_allow_html=True)
         for point in lesson["key_points"]:
-            st.markdown("- {}".format(point))
+            st.markdown(
+                '<div class="key-point">{}</div>'.format(point),
+                unsafe_allow_html=True,
+            )
+        st.markdown('</div>', unsafe_allow_html=True)
 
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    example_code = ""
     if lesson.get("code_example"):
-        st.markdown("**示例代码：**")
+        st.markdown(
+            '<p style="font-weight:600;color:#1d1d1f;margin-top:1rem;margin-bottom:0.3rem;">'
+            '示例代码</p>',
+            unsafe_allow_html=True,
+        )
         st.code(lesson["code_example"], language="python")
-        return lesson["code_example"]
-    return ""
+        example_code = lesson["code_example"]
+
+    return example_code
 
 
 def exercise_card(exercise, grading_result=None):
     """Render an exercise card with description and difficulty."""
-    st.subheader(exercise["title"])
-
     difficulty = exercise.get("difficulty", "medium")
-    difficulty_emoji = {"easy": "简单", "medium": "中等", "hard": "困难"}
-    st.caption("难度: {}".format(difficulty_emoji.get(difficulty, difficulty)))
+    difficulty_map = {
+        "easy": ("简单", "badge-easy"),
+        "medium": ("中等", "badge-medium"),
+        "hard": ("困难", "badge-hard"),
+    }
+    label, badge_class = difficulty_map.get(difficulty, ("中等", "badge-medium"))
 
-    st.markdown(exercise["description"])
+    st.markdown(
+        '<div class="card">'
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">'
+        '<h2 style="font-size:1.5rem;font-weight:700;color:#1d1d1f;margin:0;">{}</h2>'
+        '<span class="badge {}">{}</span>'
+        '</div>'
+        '<p style="color:#333;line-height:1.7;">{}</p>'
+        '</div>'.format(exercise["title"], badge_class, label, exercise["description"]),
+        unsafe_allow_html=True,
+    )
 
     if grading_result:
         st.markdown("---")
         if grading_result.all_passed:
-            st.success("所有测试通过！({}/{})".format(grading_result.passed, grading_result.total))
+            st.success(
+                "所有测试通过！({}/{})".format(
+                    grading_result.passed, grading_result.total
+                )
+            )
         else:
-            st.warning("通过 {}/{} 个测试".format(grading_result.passed, grading_result.total))
+            st.warning(
+                "通过 {}/{} 个测试".format(
+                    grading_result.passed, grading_result.total
+                )
+            )
             for detail in grading_result.details:
-                if detail.passed:
-                    st.markdown(
-                        "- **通过** `{}`：期望 `{}`，实际 `{}`".format(
-                            detail.input_desc, detail.expected, detail.actual
-                        )
+                icon = "通过" if detail.passed else "失败"
+                st.markdown(
+                    "- **{}** `{}`：期望 `{}`，实际 `{}`".format(
+                        icon, detail.input_desc, detail.expected, detail.actual
                     )
-                else:
-                    st.markdown(
-                        "- **失败** `{}`：期望 `{}`，实际 `{}`".format(
-                            detail.input_desc, detail.expected, detail.actual
-                        )
-                    )
+                )
 
 
 def sidebar_progress(progress):
@@ -93,7 +129,6 @@ def sidebar_progress(progress):
     st.sidebar.metric("已做练习", len(scores))
     st.sidebar.metric("连续学习天数", streak)
 
-    # Completion rate for exercises
     if scores:
         perfect = sum(1 for s in scores.values() if s["passed"] == s["total"])
         st.sidebar.metric(

@@ -12,30 +12,187 @@ from core.progress_tracker import (
 from courses.loader import get_exercise, get_lesson, list_courses, load_course
 from ui.components import code_editor, exercise_card, lesson_card, output_panel
 
+# Global Apple-inspired CSS theme
+GLOBAL_CSS = """
+<style>
+/* ── Fonts ── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* ── Global ── */
+html, body, [class*="css"] {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* ── Landing page hero ── */
+.hero-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 70vh;
+    padding: 2rem 1rem;
+}
+.hero-title {
+    font-size: 3.8rem;
+    font-weight: 700;
+    color: #1d1d1f;
+    letter-spacing: -0.04em;
+    margin: 0;
+    line-height: 1.1;
+}
+.hero-subtitle {
+    font-size: 1.2rem;
+    color: #86868b;
+    margin-top: 1rem;
+    margin-bottom: 2.5rem;
+    font-weight: 400;
+}
+
+/* ── Cards ── */
+.card {
+    background: #ffffff;
+    border: 1px solid #e5e5ea;
+    border-radius: 16px;
+    padding: 1.5rem 2rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    transition: box-shadow 0.2s ease;
+}
+.card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+/* ── Metric cards ── */
+.metric-card {
+    background: linear-gradient(135deg, #f5f5f7 0%, #ffffff 100%);
+    border: 1px solid #e5e5ea;
+    border-radius: 14px;
+    padding: 1.5rem;
+    text-align: center;
+}
+.metric-value {
+    font-size: 2.4rem;
+    font-weight: 700;
+    color: #1d1d1f;
+    line-height: 1;
+}
+.metric-label {
+    font-size: 0.85rem;
+    color: #86868b;
+    margin-top: 0.4rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* ── Section headers ── */
+.section-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #1d1d1f;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e5e5ea;
+}
+
+/* ── Key points list ── */
+.key-point {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    padding: 0.5rem 0;
+    font-size: 0.95rem;
+    color: #333;
+}
+.key-point::before {
+    content: "✦";
+    color: #007aff;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+/* ── Difficulty badges ── */
+.badge {
+    display: inline-block;
+    padding: 0.2rem 0.7rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+}
+.badge-easy { background: #e8f5e9; color: #2e7d32; }
+.badge-medium { background: #fff3e0; color: #e65100; }
+.badge-hard { background: #fce4ec; color: #c62828; }
+
+/* ── Sidebar ── */
+[data-testid="stSidebar"] {
+    background: #f5f5f7;
+    border-right: 1px solid #e5e5ea;
+}
+
+/* ── Buttons ── */
+.stButton > button {
+    border-radius: 12px !important;
+    font-weight: 600 !important;
+    padding: 0.6rem 1.5rem !important;
+    transition: all 0.2s ease !important;
+}
+.stButton > button:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(0,122,255,0.3) !important;
+}
+
+/* ── Code blocks ── */
+.stCodeBlock, pre {
+    border-radius: 12px !important;
+    border: 1px solid #e5e5ea !important;
+}
+
+/* ── Text areas ── */
+.stTextArea textarea {
+    border-radius: 12px !important;
+    border: 1px solid #d2d2d7 !important;
+    font-family: 'SF Mono', 'Fira Code', monospace !important;
+}
+
+/* ── Select boxes ── */
+.stSelectbox div[data-baseweb="select"] {
+    border-radius: 10px !important;
+}
+
+/* ── Mistake items ── */
+.mistake-item {
+    background: #fff5f5;
+    border-left: 3px solid #ff3b30;
+    border-radius: 0 10px 10px 0;
+    padding: 1rem 1.2rem;
+    margin-bottom: 0.8rem;
+}
+</style>
+"""
+
+
+def _inject_css():
+    """Inject global CSS once per session."""
+    if not st.session_state.get("_css_injected"):
+        st.markdown(GLOBAL_CSS, unsafe_allow_html=True)
+        st.session_state["_css_injected"] = True
+
 
 def welcome_page():
-    # Apple-style landing page using Streamlit native components
-    # Empty rows for vertical centering
-    for _ in range(6):
-        st.write("")
+    _inject_css()
 
-    # Title
     st.markdown(
-        "<h1 style='text-align:center; font-size:3.5rem; font-weight:700; "
-        "color:#1d1d1f; letter-spacing:-0.02em; margin-bottom:0;'>"
-        "Welcome to Python</h1>",
+        """
+        <div class="hero-wrapper">
+            <h1 class="hero-title">Welcome to Python</h1>
+            <p class="hero-subtitle">交互式学习，从这里开始</p>
+        </div>
+        """,
         unsafe_allow_html=True,
     )
 
-    # Subtitle
-    st.markdown(
-        "<p style='text-align:center; font-size:1.25rem; color:#6e6e73; "
-        "margin-top:0.5rem; margin-bottom:1.5rem;'>"
-        "交互式学习，从这里开始</p>",
-        unsafe_allow_html=True,
-    )
-
-    # Button centered
     col1, col2, col3 = st.columns([2, 1, 2])
     with col2:
         if st.button("开始学习", use_container_width=True, type="primary"):
@@ -44,7 +201,9 @@ def welcome_page():
 
 
 def lesson_page():
-    st.title("学习")
+    _inject_css()
+
+    st.markdown('<h1 style="font-size:2rem;font-weight:700;color:#1d1d1f;">学习</h1>', unsafe_allow_html=True)
 
     courses = list_courses()
     if not courses:
@@ -60,8 +219,12 @@ def lesson_page():
         st.error("无法加载课程: {}".format(course_id))
         return
 
-    st.markdown(course["description"])
-    st.markdown("---")
+    st.markdown(
+        '<p style="color:#86868b;font-size:1rem;margin-bottom:0.5rem;">{}</p>'.format(
+            course["description"]
+        ),
+        unsafe_allow_html=True,
+    )
 
     lessons = course.get("lessons", [])
     lesson_titles = {l["title"]: l["id"] for l in lessons}
@@ -97,7 +260,9 @@ def lesson_page():
 
 
 def practice_page():
-    st.title("练习")
+    _inject_css()
+
+    st.markdown('<h1 style="font-size:2rem;font-weight:700;color:#1d1d1f;">练习</h1>', unsafe_allow_html=True)
 
     courses = list_courses()
     if not courses:
@@ -147,7 +312,6 @@ def practice_page():
                 record_exercise_score(
                     exercise_id, grading.passed, grading.total
                 )
-                # If failed, try LLM diagnosis
                 if not grading.all_passed and grading.details:
                     errors = [
                         d.actual for d in grading.details if not d.passed
@@ -162,7 +326,6 @@ def practice_page():
     if run_key in st.session_state:
         output_panel(st.session_state[run_key])
 
-    # Auto LLM diagnosis after failed submission
     diag_key = "needs_diagnosis_{}".format(exercise_id)
     if diag_key in st.session_state and "llm_client" in st.session_state:
         diag = st.session_state[diag_key]
@@ -181,12 +344,15 @@ def practice_page():
 
 
 def ask_page():
-    st.title("提问")
+    _inject_css()
+
+    st.markdown('<h1 style="font-size:2rem;font-weight:700;color:#1d1d1f;">提问</h1>', unsafe_allow_html=True)
 
     if "llm_client" not in st.session_state:
         st.warning("请先配置 ANTHROPIC_API_KEY 环境变量")
         return
 
+    st.markdown('<div class="card">', unsafe_allow_html=True)
     user_code = st.text_area(
         "粘贴你的 Python 代码",
         value="# 在这里粘贴你的代码\n",
@@ -198,6 +364,7 @@ def ask_page():
         height=100,
         placeholder="例如：这段代码为什么会报错？如何优化这段代码？",
     )
+    st.markdown('</div>', unsafe_allow_html=True)
 
     if st.button("提问", key="ask_btn"):
         if not user_question.strip():
@@ -215,40 +382,64 @@ def ask_page():
 
 
 def dashboard_page():
-    st.title("学习进度")
+    _inject_css()
+
+    st.markdown(
+        '<h1 style="font-size:2rem;font-weight:700;color:#1d1d1f;">学习进度</h1>',
+        unsafe_allow_html=True,
+    )
 
     progress = load_progress()
 
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.metric("已完成课程", len(progress.get("completed_lessons", [])))
-    with col2:
-        st.metric("已做练习", len(progress.get("exercise_scores", {})))
-    with col3:
-        st.metric("连续学习天数", progress.get("current_streak", 0))
+    # Metric cards
+    m1, m2, m3 = st.columns(3)
+    metrics = [
+        (m1, len(progress.get("completed_lessons", [])), "已完成课程"),
+        (m2, len(progress.get("exercise_scores", {})), "已做练习"),
+        (m3, progress.get("current_streak", 0), "连续学习天数"),
+    ]
+    for col, value, label in metrics:
+        with col:
+            st.markdown(
+                '<div class="metric-card">'
+                '<div class="metric-value">{}</div>'
+                '<div class="metric-label">{}</div>'
+                '</div>'.format(value, label),
+                unsafe_allow_html=True,
+            )
 
     # Completed lessons
     if progress.get("completed_lessons"):
-        st.subheader("已完成的课程")
+        st.markdown('<div class="section-title">已完成的课程</div>', unsafe_allow_html=True)
         for lid in progress["completed_lessons"]:
-            st.markdown("- {}".format(lid))
+            st.markdown(
+                '<div class="card" style="padding:0.8rem 1.2rem;">{}</div>'.format(lid),
+                unsafe_allow_html=True,
+            )
 
     # Exercise scores
     scores = progress.get("exercise_scores", {})
     if scores:
-        st.subheader("练习成绩")
+        st.markdown('<div class="section-title">练习成绩</div>', unsafe_allow_html=True)
         for ex_id, info in scores.items():
-            status = "通过" if info["passed"] == info["total"] else "未通过"
+            passed = info["passed"] == info["total"]
+            badge_class = "badge-easy" if passed else "badge-hard"
+            status = "通过" if passed else "未通过"
             st.markdown(
-                "- **{}**：{}/{} ({})".format(
-                    ex_id, info["passed"], info["total"], status
-                )
+                '<div class="card" style="display:flex;justify-content:space-between;align-items:center;padding:0.8rem 1.2rem;">'
+                '<strong>{}</strong>'
+                '<span>{} / {} <span class="badge {}">{}</span></span>'
+                '</div>'.format(ex_id, info["passed"], info["total"], badge_class, status),
+                unsafe_allow_html=True,
             )
 
     # Mistakes
     mistakes = load_mistakes()
     if mistakes:
-        st.subheader("错题记录 (最近 10 条)")
+        st.markdown(
+            '<div class="section-title">错题记录 (最近 10 条)</div>',
+            unsafe_allow_html=True,
+        )
         for m in reversed(mistakes[-10:]):
             with st.expander(
                 "{} - {}".format(m["exercise_id"], m["timestamp"][:16])
