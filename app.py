@@ -2,7 +2,7 @@ import streamlit as st
 
 import config
 from ui.components import sidebar_progress
-from ui.pages import ask_page, dashboard_page, lesson_page, practice_page, welcome_page
+from ui.pages import ask_page, dashboard_page, lesson_page, welcome_page
 
 
 def init_session_state():
@@ -44,7 +44,7 @@ def main():
 
     # Other pages: show sidebar
     st.sidebar.title("Python 学习助手")
-    pages_list = ["学习", "练习", "提问", "进度"]
+    pages_list = ["学习", "提问", "进度"]
     current_index = pages_list.index(page) if page in pages_list else 0
     nav_page = st.sidebar.radio("导航", pages_list, index=current_index)
 
@@ -57,8 +57,6 @@ def main():
 
     if page == "学习":
         lesson_page()
-    elif page == "练习":
-        practice_page()
     elif page == "提问":
         ask_page()
     elif page == "进度":
