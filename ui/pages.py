@@ -9,298 +9,525 @@ from core.progress_tracker import (
     mark_lesson_complete,
     record_exercise_score,
 )
-from courses.loader import get_exercise, get_lesson, list_courses, load_course
-from ui.components import code_editor, exercise_card, lesson_card, output_panel
+from courses.loader import list_courses, load_course
+from ui.components import code_editor, output_panel
 
 GLOBAL_CSS = """
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 :root {
-    --black: #1d1d1f;
-    --gray-1: #6e6e73;
-    --gray-2: #86868b;
-    --gray-3: #d2d2d7;
-    --gray-4: #e8e8ed;
-    --gray-5: #f5f5f7;
-    --white: #ffffff;
-    --blue: #0077ed;
-    --blue-hover: #0071e3;
-    --green: #34c759;
-    --red: #ff3b30;
-    --orange: #ff9500;
-    --purple: #af52de;
-    --teal: #5ac8fa;
-    --blue-bg: rgba(0,119,237,0.08);
-    --green-bg: rgba(52,199,89,0.08);
-    --red-bg: rgba(255,59,48,0.08);
-    --orange-bg: rgba(255,149,0,0.08);
+    --bg: #fafaf9;
+    --surface: #ffffff;
+    --ink: #1a1a1a;
+    --ink-2: #555555;
+    --ink-3: #999999);
+    --border: #eaeaea;
+    --border-light: #f0f0f0;
+    --accent: #2563eb;
+    --accent-soft: rgba(37,99,235,0.08);
+    --accent-hover: #1d4ed8;
+    --green: #16a34a;
+    --green-soft: rgba(22,163,74,0.08);
+    --red: #dc2626;
+    --red-soft: rgba(220,38,38,0.08);
+    --orange: #ea580c;
+    --orange-soft: rgba(234,88,12,0.08);
+    --code-bg: #1e1e2e;
+    --code-surface: #2a2a3c;
+    --code-text: #cdd6f4;
+    --code-border: #3a3a4c;
+    --topbar-h: 52px;
+    --font-body: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'JetBrains Mono', 'SF Mono', 'Menlo', monospace;
 }
 
 /* ═══════════════════════════════════════════
-   BASE — Apple's clean foundation
+   RESET & BASE
    ═══════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; }
 html, body, [class*="css"] {
-    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text',
-                 'Helvetica Neue', 'Inter', sans-serif !important;
-    background: var(--white) !important;
-    color: var(--black) !important;
+    font-family: var(--font-body) !important;
+    background: var(--bg) !important;
+    color: var(--ink) !important;
     -webkit-font-smoothing: antialiased !important;
     -moz-osx-font-smoothing: grayscale !important;
+    line-height: 1.6 !important;
 }
 
-/* ── Hide Streamlit chrome ── */
-#MainMenu, footer, header {
-    visibility: hidden !important;
-}
+/* ── Kill ALL Streamlit chrome ── */
+#MainMenu, footer, header { visibility: hidden !important; }
+[data-testid="stSidebar"] { display: none !important; }
+[data-testid="stToolbar"] { display: none !important; }
 .main .block-container {
-    max-width: 980px !important;
-    padding-top: 1.5rem !important;
-    padding-bottom: 4rem !important;
+    max-width: 100% !important;
+    padding: 0 !important;
 }
 
 /* ═══════════════════════════════════════════
-   SIDEBAR — Apple dark nav
+   TOP NAV BAR — fixed, minimal
    ═══════════════════════════════════════════ */
-[data-testid="stSidebar"] {
-    background: var(--black) !important;
-    border-right: none !important;
-    padding: 1.5rem 1rem !important;
+.topnav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: var(--topbar-h);
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2rem;
+    z-index: 1000;
+    transition: box-shadow 0.3s ease;
 }
-[data-testid="stSidebar"] .stRadio label,
-[data-testid="stSidebar"] .stRadio span,
-[data-testid="stSidebar"] p,
-[data-testid="stSidebar"] h1,
-[data-testid="stSidebar"] h2,
-[data-testid="stSidebar"] h3,
-[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] {
-    color: var(--gray-3) !important;
-    font-size: 0.85rem !important;
+.topnav.scrolled {
+    box-shadow: 0 1px 12px rgba(0,0,0,0.06);
 }
-[data-testid="stSidebar"] .stRadio div[role="radiogroup"] label {
-    padding: 0.6rem 0.9rem !important;
-    border-radius: 8px !important;
-    transition: all 0.15s ease !important;
-    margin-bottom: 2px !important;
+.topnav-logo {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
-[data-testid="stSidebar"] .stRadio div[role="radiogroup"] label:has(input:checked) {
-    background: rgba(255,255,255,0.12) !important;
+.topnav-logo .logo-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
 }
-[data-testid="stSidebar"] .stRadio div[role="radiogroup"] label:has(input:checked) span {
-    color: var(--white) !important;
+.topnav-links {
+    display: flex;
+    gap: 0.25rem;
 }
-[data-testid="stSidebar"] .stRadio div[role="radiogroup"] label:hover {
-    background: rgba(255,255,255,0.06) !important;
+.topnav-link {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--ink-3);
+    padding: 0.4rem 0.9rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-decoration: none;
+    border: none;
+    background: none;
 }
-[data-testid="stSidebar"] hr {
-    border-color: rgba(255,255,255,0.08) !important;
+.topnav-link:hover {
+    color: var(--ink);
+    background: var(--border-light);
 }
-[data-testid="stSidebar"] [data-testid="stMetric"] {
-    background: transparent !important;
-    border: none !important;
-    padding: 0.5rem 0 !important;
-}
-[data-testid="stSidebar"] [data-testid="stMetric"] label {
-    color: var(--gray-2) !important;
-    font-size: 0.7rem !important;
-    font-weight: 500 !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.06em !important;
-}
-[data-testid="stSidebar"] [data-testid="stMetric"] [data-testid="stMetricValue"] {
-    color: var(--white) !important;
-    font-size: 1.4rem !important;
-    font-weight: 600 !important;
+.topnav-link.active {
+    color: var(--accent);
+    background: var(--accent-soft);
+    font-weight: 600;
 }
 
 /* ═══════════════════════════════════════════
-   HERO — Apple.com landing
+   LAYOUT — content below topnav
+   ═══════════════════════════════════════════ */
+.page-content {
+    padding-top: calc(var(--topbar-h) + 1.5rem);
+    max-width: 760px;
+    margin: 0 auto;
+    padding-left: 2rem;
+    padding-right: 2rem;
+    padding-bottom: 6rem;
+}
+.page-content-wide {
+    padding-top: calc(var(--topbar-h) + 1.5rem);
+    max-width: 960px;
+    margin: 0 auto;
+    padding-left: 2rem;
+    padding-right: 2rem;
+    padding-bottom: 6rem;
+}
+
+/* ═══════════════════════════════════════════
+   HERO — warm landing
    ═══════════════════════════════════════════ */
 .hero {
-    padding: 5rem 0 2rem 0;
+    padding: 8rem 2rem 4rem 2rem;
     text-align: center;
-    position: relative;
+    max-width: 680px;
+    margin: 0 auto;
 }
 .hero-eyebrow {
-    font-size: 0.8rem;
+    font-size: 0.72rem;
     font-weight: 600;
-    color: var(--gray-1);
-    letter-spacing: 0.08em;
+    color: var(--accent);
+    letter-spacing: 0.12em;
     text-transform: uppercase;
-    margin-bottom: 0.8rem;
+    margin-bottom: 1rem;
     opacity: 0;
-    animation: appleFade 1s ease 0.1s forwards;
+    animation: fadeUp 0.8s ease 0.1s forwards;
 }
 .hero-title {
-    font-size: clamp(3rem, 7vw, 5.5rem);
+    font-size: clamp(2.6rem, 6vw, 4.2rem);
     font-weight: 800;
-    color: var(--black);
-    line-height: 1.05;
-    margin: 0 0 0.3rem 0;
-    letter-spacing: -0.025em;
+    color: var(--ink);
+    line-height: 1.08;
+    margin: 0 0 0.5rem 0;
+    letter-spacing: -0.03em;
     opacity: 0;
-    animation: appleFade 1s ease 0.25s forwards;
+    animation: fadeUp 0.8s ease 0.2s forwards;
 }
-.hero-title-gradient {
-    background: linear-gradient(135deg, var(--blue) 0%, var(--purple) 50%, var(--orange) 100%);
+.hero-title-accent {
+    background: linear-gradient(135deg, var(--accent) 0%, #7c3aed 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
 }
 .hero-subtitle {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     font-weight: 400;
-    color: var(--gray-1);
-    margin: 0.8rem 0 2rem 0;
+    color: var(--ink-2);
+    margin: 1rem 0 2.5rem 0;
+    line-height: 1.6;
     opacity: 0;
-    animation: appleFade 1s ease 0.4s forwards;
+    animation: fadeUp 0.8s ease 0.35s forwards;
 }
-@keyframes appleFade {
-    from { opacity: 0; transform: translateY(16px); }
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
 /* ═══════════════════════════════════════════
-   TYPOGRAPHY — Apple hierarchy
+   STEP PROGRESS — thin bar + label
    ═══════════════════════════════════════════ */
-.page-title {
-    font-size: 2.8rem;
-    font-weight: 800;
-    color: var(--black);
-    letter-spacing: -0.02em;
-    margin: 2rem 0 0.3rem 0;
-    line-height: 1.1;
-}
-.page-desc {
-    font-size: 1.05rem;
-    color: var(--gray-1);
-    margin: 0 0 2rem 0;
-    font-weight: 400;
-    line-height: 1.5;
-}
-.section-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--black);
-    margin: 2.5rem 0 1rem 0;
-    letter-spacing: -0.01em;
-}
-.card-title {
-    font-size: 1.3rem;
-    font-weight: 700;
-    color: var(--black);
-    margin: 0 0 0.8rem 0;
-    letter-spacing: -0.01em;
-}
-
-/* ═══════════════════════════════════════════
-   CARDS — Apple frosted glass
-   ═══════════════════════════════════════════ */
-.apple-card {
-    background: var(--white);
-    border: 1px solid var(--gray-4);
-    border-radius: 18px;
-    padding: 2rem 2.4rem;
-    margin-bottom: 1.2rem;
-    transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
-    box-shadow: 0 0 0 rgba(0,0,0,0);
-}
-.apple-card:hover {
-    border-color: var(--gray-3);
-    box-shadow: 0 4px 24px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04);
-    transform: translateY(-2px);
-}
-.apple-card p {
-    line-height: 1.7;
-    color: #424245;
-    font-size: 0.95rem;
-}
-
-/* ═══════════════════════════════════════════
-   KEY POINTS — Apple list style
-   ═══════════════════════════════════════════ */
-.apple-points {
-    list-style: none;
-    padding: 0;
-    margin: 1.2rem 0 0 0;
-}
-.apple-points li {
+.step-progress {
     display: flex;
-    align-items: flex-start;
-    gap: 0.7rem;
-    padding: 0.7rem 0;
-    font-size: 0.92rem;
-    color: var(--black);
-    border-bottom: 1px solid var(--gray-5);
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
 }
-.apple-points li:last-child { border-bottom: none; }
-.apple-points li .dot {
-    width: 6px;
-    height: 6px;
-    min-width: 6px;
-    border-radius: 50%;
-    background: var(--blue);
-    margin-top: 0.45rem;
+.step-progress-bar {
+    flex: 1;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
 }
-
-/* ═══════════════════════════════════════════
-   CODE — Apple developer aesthetic
-   ═══════════════════════════════════════════ */
-.code-section-label {
+.step-progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.5s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+.step-progress-label {
+    font-size: 0.72rem;
+    color: var(--ink-3);
+    font-weight: 500;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+.step-course-tag {
     font-size: 0.7rem;
     font-weight: 600;
-    color: var(--gray-1);
-    letter-spacing: 0.1em;
+    color: var(--accent);
+    letter-spacing: 0.06em;
     text-transform: uppercase;
-    margin: 1.5rem 0 0.5rem 0;
-}
-.stCodeBlock {
-    border-radius: 12px !important;
-    overflow: hidden !important;
-    border: 1px solid var(--gray-4) !important;
-    box-shadow: none !important;
-}
-.stCodeBlock > div {
-    background: var(--black) !important;
+    margin-bottom: 0.3rem;
 }
 
 /* ═══════════════════════════════════════════
-   BADGES — Apple product colors
+   CONTENT CARDS — clean, minimal
    ═══════════════════════════════════════════ */
-.apple-badge {
+.content-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 2rem;
+    margin-bottom: 1rem;
+}
+.content-card h2 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin: 0 0 1rem 0;
+    letter-spacing: -0.015em;
+    line-height: 1.3;
+}
+.content-card p {
+    font-size: 0.92rem;
+    color: var(--ink-2);
+    line-height: 1.75;
+    margin: 0;
+}
+
+/* key points */
+.key-points {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0 0 0;
+}
+.key-points li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    padding: 0.55rem 0;
+    font-size: 0.88rem;
+    color: var(--ink);
+    border-bottom: 1px solid var(--border-light);
+}
+.key-points li:last-child { border-bottom: none; }
+.key-points li .kp-dot {
+    width: 5px; height: 5px;
+    min-width: 5px;
+    border-radius: 50%;
+    background: var(--accent);
+    margin-top: 0.5rem;
+}
+
+/* ═══════════════════════════════════════════
+   CODE BLOCKS — immersive dark
+   ═══════════════════════════════════════════ */
+.code-section {
+    background: var(--code-bg);
+    border-radius: 14px;
+    overflow: hidden;
+    margin: 1.2rem 0;
+    border: 1px solid var(--code-border);
+}
+.code-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.6rem 1rem;
+    background: var(--code-surface);
+    border-bottom: 1px solid var(--code-border);
+}
+.code-section-header span {
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: #888;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+.code-dots {
+    display: flex;
+    gap: 5px;
+}
+.code-dots span {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: #444;
+}
+.code-dots span:first-child { background: #ff5f57; }
+.code-dots span:nth-child(2) { background: #febc2e; }
+.code-dots span:nth-child(3) { background: #28c840; }
+.code-section .stCodeBlock {
+    border-radius: 0 !important;
+    border: none !important;
+    margin: 0 !important;
+}
+.code-section .stCodeBlock > div {
+    background: var(--code-bg) !important;
+}
+
+/* exercise code editor */
+.editor-section {
+    background: var(--code-bg);
+    border-radius: 14px;
+    overflow: hidden;
+    margin: 1rem 0;
+    border: 1px solid var(--code-border);
+}
+.editor-section .stTextArea textarea {
+    background: var(--code-bg) !important;
+    color: var(--code-text) !important;
+    border: none !important;
+    border-radius: 0 !important;
+    font-family: var(--font-mono) !important;
+    font-size: 0.85rem !important;
+    line-height: 1.6 !important;
+    padding: 1rem 1.2rem !important;
+    resize: none !important;
+}
+.editor-section .stTextArea textarea:focus {
+    box-shadow: none !important;
+    outline: none !important;
+}
+.editor-section .stTextArea textarea::placeholder {
+    color: #666 !important;
+}
+
+/* ═══════════════════════════════════════════
+   EXERCISE CARD
+   ═══════════════════════════════════════════ */
+.exercise-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.5rem 2rem;
+    margin-bottom: 1rem;
+}
+.exercise-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.8rem;
+}
+.exercise-header h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin: 0;
+    letter-spacing: -0.01em;
+}
+.exercise-desc {
+    font-size: 0.88rem;
+    color: var(--ink-2);
+    line-height: 1.7;
+    margin: 0;
+}
+
+/* ═══════════════════════════════════════════
+   BADGES — subtle
+   ═══════════════════════════════════════════ */
+.badge {
     display: inline-flex;
     align-items: center;
-    padding: 0.2rem 0.7rem;
-    border-radius: 980px;
-    font-size: 0.7rem;
+    padding: 0.15rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.68rem;
     font-weight: 600;
     letter-spacing: 0.02em;
 }
-.apple-badge.green { background: var(--green-bg); color: #1a8d3a; }
-.apple-badge.orange { background: var(--orange-bg); color: #c76100; }
-.apple-badge.red { background: var(--red-bg); color: #c72c24; }
+.badge.green { background: var(--green-soft); color: var(--green); }
+.badge.orange { background: var(--orange-soft); color: var(--orange); }
+.badge.red { background: var(--red-soft); color: var(--red); }
+.badge.blue { background: var(--accent-soft); color: var(--accent); }
 
 /* ═══════════════════════════════════════════
-   METRICS — Apple product page numbers
+   SECTION LABELS
+   ═══════════════════════════════════════════ */
+.section-label {
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: var(--ink-3);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin: 1.8rem 0 0.6rem 0;
+}
+.section-label-dark {
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: #888;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin: 0;
+}
+
+/* ═══════════════════════════════════════════
+   BUTTONS — clean pills
+   ═══════════════════════════════════════════ */
+.stButton > button {
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    font-size: 0.82rem !important;
+    padding: 0.55rem 1.4rem !important;
+    transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1) !important;
+    letter-spacing: 0 !important;
+    font-family: var(--font-body) !important;
+}
+.stButton > button[kind="primary"] {
+    background: var(--accent) !important;
+    color: #fff !important;
+    border: none !important;
+}
+.stButton > button[kind="primary"]:hover {
+    background: var(--accent-hover) !important;
+    box-shadow: 0 2px 12px rgba(37,99,235,0.3) !important;
+    transform: translateY(-1px) !important;
+}
+.stButton > button:not([kind="primary"]) {
+    background: transparent !important;
+    color: var(--ink-2) !important;
+    border: 1px solid var(--border) !important;
+}
+.stButton > button:not([kind="primary"]):hover {
+    border-color: var(--ink-3) !important;
+    color: var(--ink) !important;
+}
+
+/* ═══════════════════════════════════════════
+   INPUTS
+   ═══════════════════════════════════════════ */
+.stTextArea textarea {
+    border-radius: 10px !important;
+    border: 1px solid var(--border) !important;
+    font-family: var(--font-body) !important;
+    font-size: 0.88rem !important;
+    background: var(--surface) !important;
+    color: var(--ink) !important;
+    transition: all 0.2s ease !important;
+    padding: 0.8rem 1rem !important;
+}
+.stTextArea textarea:focus {
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 0 3px var(--accent-soft) !important;
+    outline: none !important;
+}
+
+/* ═══════════════════════════════════════════
+   ALERTS
+   ═══════════════════════════════════════════ */
+.stSuccess, .stError, .stWarning, .stInfo {
+    border-radius: 10px !important;
+    border: none !important;
+    font-size: 0.88rem !important;
+}
+.stSuccess { background: var(--green-soft) !important; }
+.stError { background: var(--red-soft) !important; }
+.stWarning { background: var(--orange-soft) !important; }
+
+/* ═══════════════════════════════════════════
+   DIVIDER — hairline
+   ═══════════════════════════════════════════ */
+.hairline {
+    height: 1px;
+    background: var(--border);
+    border: none;
+    margin: 1.5rem 0;
+}
+
+/* ═══════════════════════════════════════════
+   BOTTOM NAV — sticky step navigation
+   ═══════════════════════════════════════════ */
+.step-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+}
+
+/* ═══════════════════════════════════════════
+   METRICS
    ═══════════════════════════════════════════ */
 .metric-block {
     text-align: center;
     padding: 1.5rem 1rem;
 }
 .metric-big {
-    font-size: 3.2rem;
+    font-size: 2.8rem;
     font-weight: 800;
-    color: var(--black);
+    color: var(--ink);
     line-height: 1;
     letter-spacing: -0.03em;
 }
 .metric-label {
-    font-size: 0.78rem;
+    font-size: 0.72rem;
     font-weight: 500;
-    color: var(--gray-1);
+    color: var(--ink-3);
     margin-top: 0.3rem;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.06em;
 }
 
 /* ═══════════════════════════════════════════
@@ -310,98 +537,23 @@ html, body, [class*="css"] {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem 0;
-    border-bottom: 1px solid var(--gray-5);
+    padding: 0.8rem 0;
+    border-bottom: 1px solid var(--border-light);
     transition: all 0.2s ease;
 }
 .score-item:last-child { border-bottom: none; }
-.score-item:hover {
-    padding-left: 8px;
-}
 
 /* ═══════════════════════════════════════════
-   BUTTONS — Apple blue pill
+   SCROLL REVEAL
    ═══════════════════════════════════════════ */
-.stButton > button {
-    border-radius: 980px !important;
-    font-weight: 500 !important;
-    font-size: 0.88rem !important;
-    padding: 0.6rem 1.6rem !important;
-    transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1) !important;
-    letter-spacing: 0.01em !important;
+.reveal {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
 }
-.stButton > button[kind="primary"] {
-    background: var(--blue) !important;
-    color: #fff !important;
-    border: none !important;
-}
-.stButton > button[kind="primary"]:hover {
-    background: var(--blue-hover) !important;
-    box-shadow: 0 2px 12px rgba(0,119,237,0.35) !important;
-    transform: scale(1.02) !important;
-}
-.stButton > button:not([kind="primary"]) {
-    background: transparent !important;
-    color: var(--blue) !important;
-    border: 1px solid var(--gray-4) !important;
-}
-.stButton > button:not([kind="primary"]):hover {
-    background: var(--blue-bg) !important;
-    border-color: var(--blue) !important;
-}
-
-/* ═══════════════════════════════════════════
-   INPUTS — Apple form fields
-   ═══════════════════════════════════════════ */
-.stTextArea textarea {
-    border-radius: 12px !important;
-    border: 1px solid var(--gray-4) !important;
-    font-family: 'SF Mono', 'Menlo', 'Consolas', monospace !important;
-    font-size: 0.88rem !important;
-    background: var(--gray-5) !important;
-    color: var(--black) !important;
-    transition: all 0.2s ease !important;
-    padding: 1rem !important;
-}
-.stTextArea textarea:focus {
-    border-color: var(--blue) !important;
-    background: var(--white) !important;
-    box-shadow: 0 0 0 4px rgba(0,119,237,0.12) !important;
-    outline: none !important;
-}
-
-/* ── Select ── */
-.stSelectbox label {
-    font-size: 0.72rem !important;
-    font-weight: 600 !important;
-    color: var(--gray-1) !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.08em !important;
-}
-.stSelectbox div[data-baseweb="select"] {
-    border-radius: 10px !important;
-    border-color: var(--gray-4) !important;
-}
-
-/* ═══════════════════════════════════════════
-   ALERTS — Apple system colors
-   ═══════════════════════════════════════════ */
-.stSuccess, .stError, .stWarning, .stInfo {
-    border-radius: 12px !important;
-    border: none !important;
-}
-.stSuccess { background: var(--green-bg) !important; }
-.stError { background: var(--red-bg) !important; }
-.stWarning { background: var(--orange-bg) !important; }
-
-/* ═══════════════════════════════════════════
-   DIVIDER — Apple thin rule
-   ═══════════════════════════════════════════ */
-.apple-hr {
-    height: 1px;
-    background: var(--gray-4);
-    border: none;
-    margin: 2rem 0;
+.reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 /* ═══════════════════════════════════════════
@@ -409,9 +561,52 @@ html, body, [class*="css"] {
    ═══════════════════════════════════════════ */
 .streamlit-expanderHeader {
     font-weight: 500 !important;
-    border-radius: 12px !important;
+    border-radius: 10px !important;
+}
+
+/* ═══════════════════════════════════════════
+   PAGE TITLES (ask / dashboard)
+   ═══════════════════════════════════════════ */
+.page-title {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+    margin: 0 0 0.3rem 0;
+    line-height: 1.15;
+}
+.page-desc {
+    font-size: 0.95rem;
+    color: var(--ink-2);
+    margin: 0 0 2rem 0;
+    font-weight: 400;
+    line-height: 1.6;
+}
+.section-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin: 2rem 0 0.8rem 0;
+    letter-spacing: -0.01em;
 }
 </style>
+
+<script>
+// Scroll reveal observer
+document.addEventListener('DOMContentLoaded', function() {
+    var obs = new IntersectionObserver(function(entries) {
+        entries.forEach(function(e) {
+            if (e.isIntersecting) { e.target.classList.add('visible'); }
+        });
+    }, { threshold: 0.08 });
+    document.querySelectorAll('.reveal').forEach(function(el) { obs.observe(el); });
+});
+// Topnav scroll shadow
+window.addEventListener('scroll', function() {
+    var nav = document.querySelector('.topnav');
+    if (nav) { nav.classList.toggle('scrolled', window.scrollY > 8); }
+});
+</script>
 """
 
 
@@ -429,10 +624,13 @@ def welcome_page():
         <div class="hero">
             <div class="hero-eyebrow">Interactive Python Tutorial</div>
             <h1 class="hero-title">
-                Welcome to<br>
-                <span class="hero-title-gradient">Python.</span>
+                Learn to code.<br>
+                <span class="hero-title-accent">One step at a time.</span>
             </h1>
-            <p class="hero-subtitle">交互式学习，从这里开始</p>
+            <p class="hero-subtitle">
+                交互式 Python 学习 — 每学一个知识点，立刻动手练习。<br>
+                没有侧边栏，没有干扰，专注于当下这一步。
+            </p>
         </div>
         """,
         unsafe_allow_html=True,
@@ -475,30 +673,94 @@ def _find_resume_step(courses, progress):
     return last_ci, last_si
 
 
+def _render_lesson_card(lesson):
+    """Render lesson content with new design. Returns example_code if any."""
+    st.markdown(
+        '<div class="content-card">'
+        '<h2>{}</h2>'.format(lesson["title"]),
+        unsafe_allow_html=True,
+    )
+
+    st.markdown(lesson["explanation"])
+
+    if lesson.get("key_points"):
+        items = "".join(
+            '<li><span class="kp-dot"></span>{}</li>'.format(p)
+            for p in lesson["key_points"]
+        )
+        st.markdown(
+            '<ul class="key-points">{}</ul>'.format(items),
+            unsafe_allow_html=True,
+        )
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    return lesson.get("code_example", "")
+
+
 def _render_exercise(exercise):
     """Render the exercise block (card + editor + buttons + results)."""
     exercise_id = exercise["id"]
 
-    st.markdown('<hr class="apple-hr">', unsafe_allow_html=True)
+    # Section label
     st.markdown(
-        '<div style="font-size:0.7rem;font-weight:600;color:var(--gray-1);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.6rem;">练习</div>',
+        '<div class="section-label" style="margin-top:2rem;">练习</div>',
         unsafe_allow_html=True,
     )
+
+    # Exercise card
+    difficulty = exercise.get("difficulty", "medium")
+    diff_map = {"easy": ("简单", "green"), "medium": ("中等", "orange"), "hard": ("困难", "red")}
+    label, badge_cls = diff_map.get(difficulty, ("中等", "orange"))
 
     grading_result = st.session_state.get("grading_result_{}".format(exercise_id))
-    exercise_card(exercise, grading_result)
 
     st.markdown(
-        '<div class="code-section-label">代码编辑器</div>',
+        '<div class="exercise-card">'
+        '<div class="exercise-header">'
+        '<h3>{}</h3>'
+        '<span class="badge {}">{}</span>'
+        '</div>'
+        '<p class="exercise-desc">{}</p>'
+        '</div>'.format(exercise["title"], badge_cls, label, exercise["description"]),
         unsafe_allow_html=True,
     )
+
+    if grading_result:
+        if grading_result.all_passed:
+            st.success(
+                "所有测试通过！({}/{})".format(grading_result.passed, grading_result.total)
+            )
+        else:
+            st.warning(
+                "通过 {}/{} 个测试".format(grading_result.passed, grading_result.total)
+            )
+            for detail in grading_result.details:
+                icon = "✓" if detail.passed else "✗"
+                st.markdown(
+                    "- **{}** `{}`：期望 `{}`，实际 `{}`".format(
+                        icon, detail.input_desc, detail.expected, detail.actual
+                    )
+                )
+
+    # Code editor in dark container
     starter = exercise.get("starter_code", "# 在这里写你的代码\n")
+    st.markdown(
+        '<div class="editor-section">'
+        '<div class="code-section-header">'
+        '<span>代码编辑器</span>'
+        '<div class="code-dots"><span></span><span></span><span></span></div>'
+        '</div>',
+        unsafe_allow_html=True,
+    )
     user_code = code_editor(
         initial_code=starter,
         key="exercise_editor_{}".format(exercise_id),
         height=250,
     )
+    st.markdown('</div>', unsafe_allow_html=True)
 
+    # Action buttons
     c1, c2, _ = st.columns([1, 1, 2])
     with c1:
         if st.button("▶  运行", key="run_{}".format(exercise_id)):
@@ -523,6 +785,7 @@ def _render_exercise(exercise):
                     }
                 st.rerun()
 
+    # Run output
     run_key = "run_result_{}".format(exercise_id)
     if run_key in st.session_state:
         output_panel(st.session_state[run_key])
@@ -531,9 +794,8 @@ def _render_exercise(exercise):
     diag_key = "needs_diagnosis_{}".format(exercise_id)
     if diag_key in st.session_state and "llm_client" in st.session_state:
         diag = st.session_state[diag_key]
-        st.markdown('<hr class="apple-hr">', unsafe_allow_html=True)
         st.markdown(
-            '<div class="code-section-label">AI 诊断</div>',
+            '<div class="section-label">AI 诊断</div>',
             unsafe_allow_html=True,
         )
         with st.spinner("正在分析错误..."):
@@ -584,32 +846,47 @@ def lesson_page():
     step = steps[si]
     total = len(steps)
 
+    # ── Page content wrapper ──
+    st.markdown('<div class="page-content">', unsafe_allow_html=True)
+
     # ── Progress bar ──
     progress_pct = int((si + 1) / total * 100)
     st.markdown(
-        '<div style="display:flex;align-items:center;gap:1rem;margin-bottom:0.3rem;">'
-        '<div style="flex:1;height:4px;background:var(--gray-5);border-radius:2px;overflow:hidden;">'
-        '<div style="width:{}%;height:100%;background:var(--blue);border-radius:2px;transition:width 0.4s ease;"></div>'
-        '</div>'
-        '<span style="font-size:0.78rem;color:var(--gray-2);font-weight:500;white-space:nowrap;">{} / {}</span>'
+        '<div class="step-progress">'
+        '<div class="step-progress-bar"><div class="step-progress-fill" style="width:{}%;"></div></div>'
+        '<span class="step-progress-label">{}/{}</span>'
         '</div>'.format(progress_pct, si + 1, total),
         unsafe_allow_html=True,
     )
 
-    # ── Course title ──
+    # ── Course tag ──
     st.markdown(
-        '<p style="font-size:0.8rem;color:var(--gray-2);font-weight:500;margin:0.5rem 0 0 0;text-transform:uppercase;letter-spacing:0.06em;">{}</p>'.format(
-            course["title"]
-        ),
+        '<div class="step-course-tag">{}</div>'.format(course["title"]),
         unsafe_allow_html=True,
     )
 
     # ── Render current step ──
     if step["type"] == "lesson":
         lesson = step["data"]
-        example_code = lesson_card(lesson)
 
+        # Lesson card
+        st.markdown('<div class="reveal">', unsafe_allow_html=True)
+        example_code = _render_lesson_card(lesson)
+        st.markdown('</div>', unsafe_allow_html=True)
+
+        # Code example in dark container
         if example_code:
+            st.markdown(
+                '<div class="code-section reveal">'
+                '<div class="code-section-header">'
+                '<span>示例代码</span>'
+                '<div class="code-dots"><span></span><span></span><span></span></div>'
+                '</div>',
+                unsafe_allow_html=True,
+            )
+            st.code(example_code, language="python")
+            st.markdown('</div>', unsafe_allow_html=True)
+
             run_col, _ = st.columns([1, 3])
             with run_col:
                 if st.button("▶  运行示例", key="run_example"):
@@ -630,21 +907,25 @@ def lesson_page():
                 st.rerun()
         else:
             st.markdown(
-                '<div style="display:flex;align-items:center;gap:0.5rem;margin:0.5rem 0;color:var(--green);font-size:0.88rem;font-weight:500;">'
+                '<div style="display:flex;align-items:center;gap:0.5rem;margin:1rem 0;color:var(--green);font-size:0.85rem;font-weight:500;">'
                 '<span>&#10003;</span> 已完成</div>',
                 unsafe_allow_html=True,
             )
 
     elif step["type"] == "exercise":
+        st.markdown('<div class="reveal">', unsafe_allow_html=True)
         _render_exercise(step["data"])
+        st.markdown('</div>', unsafe_allow_html=True)
 
     # ── Bottom navigation ──
-    st.markdown('<hr class="apple-hr">', unsafe_allow_html=True)
-
     has_prev = si > 0 or ci > 0
     is_last_step = (ci == len(courses) - 1) and (si == len(steps) - 1)
     is_last_in_course = si == len(steps) - 1
 
+    st.markdown(
+        '<div class="step-nav">',
+        unsafe_allow_html=True,
+    )
     nav_l, nav_r = st.columns(2)
     with nav_l:
         if has_prev:
@@ -674,14 +955,18 @@ def lesson_page():
                 st.rerun()
         else:
             st.markdown(
-                '<div style="text-align:center;padding:0.6rem;color:var(--gray-2);font-size:0.88rem;">'
-                '所有课程已完成</div>',
+                '<span style="color:var(--ink-3);font-size:0.85rem;">所有课程已完成</span>',
                 unsafe_allow_html=True,
             )
+    st.markdown('</div>', unsafe_allow_html=True)  # close .step-nav
+
+    st.markdown('</div>', unsafe_allow_html=True)  # close .page-content
 
 
 def ask_page():
     _inject_css()
+
+    st.markdown('<div class="page-content">', unsafe_allow_html=True)
 
     st.markdown(
         '<h1 class="page-title">提问</h1>'
@@ -691,9 +976,10 @@ def ask_page():
 
     if "llm_client" not in st.session_state:
         st.warning("请先配置 ANTHROPIC_API_KEY 环境变量")
+        st.markdown('</div>', unsafe_allow_html=True)
         return
 
-    st.markdown('<div class="apple-card">', unsafe_allow_html=True)
+    st.markdown('<div class="content-card">', unsafe_allow_html=True)
     user_code = st.text_area(
         "粘贴你的 Python 代码",
         value="# 在这里粘贴你的代码\n",
@@ -715,10 +1001,10 @@ def ask_page():
             try:
                 llm = st.session_state["llm_client"]
                 st.markdown(
-                    '<div class="code-section-label" style="margin-top:2rem;">回答</div>',
+                    '<div class="section-label" style="margin-top:2rem;">回答</div>',
                     unsafe_allow_html=True,
                 )
-                st.markdown('<div class="apple-card">', unsafe_allow_html=True)
+                st.markdown('<div class="content-card">', unsafe_allow_html=True)
                 st.write_stream(
                     llm.answer_question_stream(user_code, user_question)
                 )
@@ -726,9 +1012,13 @@ def ask_page():
             except Exception as e:
                 st.error("调用 LLM 失败: {}".format(e))
 
+    st.markdown('</div>', unsafe_allow_html=True)
+
 
 def dashboard_page():
     _inject_css()
+
+    st.markdown('<div class="page-content">', unsafe_allow_html=True)
 
     st.markdown(
         '<h1 class="page-title">学习进度</h1>'
@@ -802,3 +1092,5 @@ def dashboard_page():
                 if m.get("llm_explanation"):
                     st.markdown("**AI 解释：**")
                     st.markdown(m["llm_explanation"])
+
+    st.markdown('</div>', unsafe_allow_html=True)  # close .page-content

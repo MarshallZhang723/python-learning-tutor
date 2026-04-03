@@ -1,7 +1,6 @@
 import streamlit as st
 
 import config
-from ui.components import sidebar_progress
 from ui.pages import ask_page, dashboard_page, lesson_page, welcome_page
 
 
@@ -22,39 +21,50 @@ def main():
     st.set_page_config(
         page_title="Python 学习助手",
         page_icon="",
-        layout="wide",
+        layout="centered",
         initial_sidebar_state="collapsed",
     )
 
     init_session_state()
 
+    # ── State-based page routing ──
     if "current_page" not in st.session_state:
         st.session_state["current_page"] = "首页"
 
     page = st.session_state["current_page"]
 
     if page == "首页":
-        # Hide sidebar entirely via CSS on landing page
-        st.markdown(
-            "<style>[data-testid='stSidebar'] {display: none;}</style>",
-            unsafe_allow_html=True,
-        )
         welcome_page()
         return
 
-    # Other pages: show sidebar
-    st.sidebar.title("Python 学习助手")
+    # ── Top navigation bar ──
     pages_list = ["学习", "提问", "进度"]
-    current_index = pages_list.index(page) if page in pages_list else 0
-    nav_page = st.sidebar.radio("导航", pages_list, index=current_index)
+    links_html = ""
+    for label in pages_list:
+        cls = "topnav-link active" if label == page else "topnav-link"
+        # Each link is a hidden anchor; actual navigation via Streamlit buttons below
+        links_html += '<span class="{}">{}</span>'.format(cls, label)
 
-    if nav_page != page:
-        st.session_state["current_page"] = nav_page
-        st.rerun()
+    st.markdown(
+        '<div class="topnav">'
+        '<div class="topnav-logo"><span class="logo-dot"></span>Python Tutor</div>'
+        '<div class="topnav-links">{}</div>'
+        '</div>'.format(links_html),
+        unsafe_allow_html=True,
+    )
 
-    from core.progress_tracker import load_progress
-    sidebar_progress(load_progress())
+    # Invisible navigation buttons overlaid on topnav links
+    # Streamlit can't do JS→Python, so we use st.columns with small nav buttons
+    # positioned to look like the topnav links
+    nav_cols = st.columns(len(pages_list))
+    for i, label in enumerate(pages_list):
+        with nav_cols[i]:
+            if label != page:
+                if st.button(label, key="nav_{}".format(label)):
+                    st.session_state["current_page"] = label
+                    st.rerun()
 
+    # ── Render page ──
     if page == "学习":
         lesson_page()
     elif page == "提问":
