@@ -14,424 +14,402 @@ from ui.components import code_editor, exercise_card, lesson_card, output_panel
 
 GLOBAL_CSS = """
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Source+Sans+3:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 :root {
-    --ink: #1a1a2e;
-    --paper: #faf8f5;
-    --paper-warm: #f3efe8;
-    --accent: #e85d26;
-    --accent-glow: #ff7a45;
-    --sage: #4a7c59;
-    --sage-light: #e8f0eb;
-    --slate: #6b7280;
-    --mist: #e8e4de;
-    --code-bg: #1e1e2e;
-    --code-fg: #cdd6f4;
-    --success-bg: #ecfdf5;
-    --success-border: #4a7c59;
-    --error-bg: #fef2f2;
-    --error-border: #dc2626;
-    --warning-bg: #fffbeb;
-    --warning-border: #d97706;
-    --radius: 14px;
-    --radius-sm: 8px;
-    --shadow-sm: 0 1px 2px rgba(26,26,46,0.05);
-    --shadow-md: 0 4px 16px rgba(26,26,46,0.08);
-    --shadow-lg: 0 8px 32px rgba(26,26,46,0.12);
-    --shadow-glow: 0 0 40px rgba(232,93,38,0.15);
+    --black: #1d1d1f;
+    --gray-1: #6e6e73;
+    --gray-2: #86868b;
+    --gray-3: #d2d2d7;
+    --gray-4: #e8e8ed;
+    --gray-5: #f5f5f7;
+    --white: #ffffff;
+    --blue: #0077ed;
+    --blue-hover: #0071e3;
+    --green: #34c759;
+    --red: #ff3b30;
+    --orange: #ff9500;
+    --purple: #af52de;
+    --teal: #5ac8fa;
+    --blue-bg: rgba(0,119,237,0.08);
+    --green-bg: rgba(52,199,89,0.08);
+    --red-bg: rgba(255,59,48,0.08);
+    --orange-bg: rgba(255,149,0,0.08);
 }
 
-/* ── Reset & base ── */
+/* ═══════════════════════════════════════════
+   BASE — Apple's clean foundation
+   ═══════════════════════════════════════════ */
 html, body, [class*="css"] {
-    font-family: 'Source Sans 3', -apple-system, sans-serif !important;
-    background: var(--paper) !important;
-    color: var(--ink) !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text',
+                 'Helvetica Neue', 'Inter', sans-serif !important;
+    background: var(--white) !important;
+    color: var(--black) !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
 }
 
-/* ── Sidebar ── */
+/* ── Hide Streamlit chrome ── */
+#MainMenu, footer, header {
+    visibility: hidden !important;
+}
+.main .block-container {
+    max-width: 980px !important;
+    padding-top: 1.5rem !important;
+    padding-bottom: 4rem !important;
+}
+
+/* ═══════════════════════════════════════════
+   SIDEBAR — Apple dark nav
+   ═══════════════════════════════════════════ */
 [data-testid="stSidebar"] {
-    background: var(--ink) !important;
+    background: var(--black) !important;
     border-right: none !important;
-    padding-top: 1rem;
+    padding: 1.5rem 1rem !important;
 }
 [data-testid="stSidebar"] .stRadio label,
 [data-testid="stSidebar"] .stRadio span,
 [data-testid="stSidebar"] p,
 [data-testid="stSidebar"] h1,
 [data-testid="stSidebar"] h2,
-[data-testid="stSidebar"] h3 {
-    color: #e8e4de !important;
+[data-testid="stSidebar"] h3,
+[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] {
+    color: var(--gray-3) !important;
+    font-size: 0.85rem !important;
 }
 [data-testid="stSidebar"] .stRadio div[role="radiogroup"] label {
-    padding: 0.5rem 1rem !important;
-    border-radius: var(--radius-sm) !important;
-    transition: all 0.2s ease !important;
+    padding: 0.6rem 0.9rem !important;
+    border-radius: 8px !important;
+    transition: all 0.15s ease !important;
+    margin-bottom: 2px !important;
+}
+[data-testid="stSidebar"] .stRadio div[role="radiogroup"] label:has(input:checked) {
+    background: rgba(255,255,255,0.12) !important;
+}
+[data-testid="stSidebar"] .stRadio div[role="radiogroup"] label:has(input:checked) span {
+    color: var(--white) !important;
 }
 [data-testid="stSidebar"] .stRadio div[role="radiogroup"] label:hover {
-    background: rgba(255,255,255,0.08) !important;
+    background: rgba(255,255,255,0.06) !important;
 }
 [data-testid="stSidebar"] hr {
-    border-color: rgba(255,255,255,0.1) !important;
+    border-color: rgba(255,255,255,0.08) !important;
 }
 [data-testid="stSidebar"] [data-testid="stMetric"] {
-    background: rgba(255,255,255,0.05) !important;
-    border-radius: var(--radius-sm) !important;
-    padding: 0.8rem !important;
-    border: 1px solid rgba(255,255,255,0.08) !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 0.5rem 0 !important;
 }
 [data-testid="stSidebar"] [data-testid="stMetric"] label {
-    color: #9ca3af !important;
-    font-size: 0.75rem !important;
+    color: var(--gray-2) !important;
+    font-size: 0.7rem !important;
+    font-weight: 500 !important;
     text-transform: uppercase !important;
-    letter-spacing: 0.08em !important;
+    letter-spacing: 0.06em !important;
 }
 [data-testid="stSidebar"] [data-testid="stMetric"] [data-testid="stMetricValue"] {
-    color: var(--accent-glow) !important;
-    font-family: 'Playfair Display', serif !important;
-    font-size: 1.6rem !important;
+    color: var(--white) !important;
+    font-size: 1.4rem !important;
+    font-weight: 600 !important;
 }
 
-/* ── Hero / Landing ── */
+/* ═══════════════════════════════════════════
+   HERO — Apple.com landing
+   ═══════════════════════════════════════════ */
 .hero {
-    min-height: 85vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    padding: 5rem 0 2rem 0;
     text-align: center;
     position: relative;
-    overflow: hidden;
 }
-.hero::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(ellipse at 30% 50%, rgba(232,93,38,0.06) 0%, transparent 50%),
-                radial-gradient(ellipse at 70% 30%, rgba(74,124,89,0.05) 0%, transparent 50%),
-                radial-gradient(ellipse at 50% 80%, rgba(232,93,38,0.03) 0%, transparent 40%);
-    animation: drift 20s ease-in-out infinite alternate;
-    pointer-events: none;
-}
-@keyframes drift {
-    0% { transform: translate(0, 0) rotate(0deg); }
-    100% { transform: translate(2%, -1%) rotate(2deg); }
-}
-.hero-label {
-    font-family: 'JetBrains Mono', monospace;
+.hero-eyebrow {
     font-size: 0.8rem;
-    font-weight: 500;
-    color: var(--accent);
-    letter-spacing: 0.2em;
+    font-weight: 600;
+    color: var(--gray-1);
+    letter-spacing: 0.08em;
     text-transform: uppercase;
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.8rem;
     opacity: 0;
-    animation: fadeUp 0.8s ease 0.2s forwards;
+    animation: appleFade 1s ease 0.1s forwards;
 }
 .hero-title {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(2.8rem, 6vw, 5rem);
-    font-weight: 900;
-    color: var(--ink);
+    font-size: clamp(3rem, 7vw, 5.5rem);
+    font-weight: 800;
+    color: var(--black);
     line-height: 1.05;
-    margin: 0;
-    letter-spacing: -0.03em;
+    margin: 0 0 0.3rem 0;
+    letter-spacing: -0.025em;
     opacity: 0;
-    animation: fadeUp 0.8s ease 0.4s forwards;
+    animation: appleFade 1s ease 0.25s forwards;
 }
-.hero-title em {
-    font-style: italic;
-    color: var(--accent);
-}
-.hero-divider {
-    width: 60px;
-    height: 3px;
-    background: var(--accent);
-    margin: 1.5rem auto;
-    border-radius: 2px;
-    opacity: 0;
-    animation: fadeUp 0.8s ease 0.6s forwards;
+.hero-title-gradient {
+    background: linear-gradient(135deg, var(--blue) 0%, var(--purple) 50%, var(--orange) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 .hero-subtitle {
-    font-family: 'Source Sans 3', sans-serif;
-    font-size: 1.15rem;
-    color: var(--slate);
+    font-size: 1.2rem;
     font-weight: 400;
-    margin: 0 0 2.5rem 0;
-    max-width: 400px;
+    color: var(--gray-1);
+    margin: 0.8rem 0 2rem 0;
     opacity: 0;
-    animation: fadeUp 0.8s ease 0.8s forwards;
+    animation: appleFade 1s ease 0.4s forwards;
 }
-@keyframes fadeUp {
-    from { opacity: 0; transform: translateY(20px); }
+@keyframes appleFade {
+    from { opacity: 0; transform: translateY(16px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* ── Page header ── */
-.page-header {
-    margin-bottom: 2rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid var(--mist);
-}
-.page-header h1 {
-    font-family: 'Playfair Display', serif;
-    font-size: 2.2rem;
-    font-weight: 900;
-    color: var(--ink);
-    margin: 0;
+/* ═══════════════════════════════════════════
+   TYPOGRAPHY — Apple hierarchy
+   ═══════════════════════════════════════════ */
+.page-title {
+    font-size: 2.8rem;
+    font-weight: 800;
+    color: var(--black);
     letter-spacing: -0.02em;
+    margin: 2rem 0 0.3rem 0;
+    line-height: 1.1;
 }
-.page-header p {
-    color: var(--slate);
-    font-size: 0.95rem;
-    margin: 0.3rem 0 0 0;
+.page-desc {
+    font-size: 1.05rem;
+    color: var(--gray-1);
+    margin: 0 0 2rem 0;
+    font-weight: 400;
+    line-height: 1.5;
 }
-
-/* ── Content cards ── */
-.content-card {
-    background: #fff;
-    border: 1px solid var(--mist);
-    border-radius: var(--radius);
-    padding: 2rem 2.2rem;
-    margin-bottom: 1.5rem;
-    box-shadow: var(--shadow-sm);
-    transition: box-shadow 0.3s ease, transform 0.3s ease;
-}
-.content-card:hover {
-    box-shadow: var(--shadow-md);
-    transform: translateY(-2px);
-}
-.content-card h2 {
-    font-family: 'Playfair Display', serif;
+.section-title {
     font-size: 1.5rem;
     font-weight: 700;
-    color: var(--ink);
-    margin: 0 0 1rem 0;
+    color: var(--black);
+    margin: 2.5rem 0 1rem 0;
+    letter-spacing: -0.01em;
 }
-.content-card p {
-    line-height: 1.8;
-    color: #374151;
+.card-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--black);
+    margin: 0 0 0.8rem 0;
+    letter-spacing: -0.01em;
 }
 
-/* ── Key points ── */
-.key-points {
+/* ═══════════════════════════════════════════
+   CARDS — Apple frosted glass
+   ═══════════════════════════════════════════ */
+.apple-card {
+    background: var(--white);
+    border: 1px solid var(--gray-4);
+    border-radius: 18px;
+    padding: 2rem 2.4rem;
+    margin-bottom: 1.2rem;
+    transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+    box-shadow: 0 0 0 rgba(0,0,0,0);
+}
+.apple-card:hover {
+    border-color: var(--gray-3);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04);
+    transform: translateY(-2px);
+}
+.apple-card p {
+    line-height: 1.7;
+    color: #424245;
+    font-size: 0.95rem;
+}
+
+/* ═══════════════════════════════════════════
+   KEY POINTS — Apple list style
+   ═══════════════════════════════════════════ */
+.apple-points {
     list-style: none;
     padding: 0;
-    margin: 1rem 0 0 0;
+    margin: 1.2rem 0 0 0;
 }
-.key-points li {
-    position: relative;
-    padding: 0.6rem 0 0.6rem 2rem;
-    font-size: 0.95rem;
-    color: var(--ink);
-    border-bottom: 1px solid #f3f1ed;
+.apple-points li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.7rem;
+    padding: 0.7rem 0;
+    font-size: 0.92rem;
+    color: var(--black);
+    border-bottom: 1px solid var(--gray-5);
 }
-.key-points li:last-child {
-    border-bottom: none;
-}
-.key-points li::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 8px;
-    height: 8px;
+.apple-points li:last-child { border-bottom: none; }
+.apple-points li .dot {
+    width: 6px;
+    height: 6px;
+    min-width: 6px;
     border-radius: 50%;
-    background: var(--accent);
+    background: var(--blue);
+    margin-top: 0.45rem;
 }
 
-/* ── Code display ── */
-.code-label {
-    font-family: 'JetBrains Mono', monospace;
+/* ═══════════════════════════════════════════
+   CODE — Apple developer aesthetic
+   ═══════════════════════════════════════════ */
+.code-section-label {
     font-size: 0.7rem;
     font-weight: 600;
-    color: var(--accent);
-    letter-spacing: 0.15em;
+    color: var(--gray-1);
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     margin: 1.5rem 0 0.5rem 0;
 }
 .stCodeBlock {
-    border-radius: var(--radius) !important;
+    border-radius: 12px !important;
     overflow: hidden !important;
-    box-shadow: var(--shadow-md) !important;
+    border: 1px solid var(--gray-4) !important;
+    box-shadow: none !important;
 }
 .stCodeBlock > div {
-    background: var(--code-bg) !important;
+    background: var(--black) !important;
 }
 
-/* ── Difficulty badges ── */
-.badge {
+/* ═══════════════════════════════════════════
+   BADGES — Apple product colors
+   ═══════════════════════════════════════════ */
+.apple-badge {
     display: inline-flex;
     align-items: center;
-    gap: 0.3rem;
-    padding: 0.25rem 0.8rem;
-    border-radius: 20px;
-    font-family: 'JetBrains Mono', monospace;
+    padding: 0.2rem 0.7rem;
+    border-radius: 980px;
     font-size: 0.7rem;
     font-weight: 600;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
+    letter-spacing: 0.02em;
 }
-.badge-easy { background: var(--sage-light); color: var(--sage); }
-.badge-medium { background: var(--warning-bg); color: var(--warning-border); }
-.badge-hard { background: var(--error-bg); color: var(--error-border); }
+.apple-badge.green { background: var(--green-bg); color: #1a8d3a; }
+.apple-badge.orange { background: var(--orange-bg); color: #c76100; }
+.apple-badge.red { background: var(--red-bg); color: #c72c24; }
 
-/* ── Metric cards (dashboard) ── */
-.metric-wrap {
-    background: #fff;
-    border: 1px solid var(--mist);
-    border-radius: var(--radius);
-    padding: 1.8rem 1.5rem;
+/* ═══════════════════════════════════════════
+   METRICS — Apple product page numbers
+   ═══════════════════════════════════════════ */
+.metric-block {
     text-align: center;
-    box-shadow: var(--shadow-sm);
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
+    padding: 1.5rem 1rem;
 }
-.metric-wrap::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, var(--accent), var(--sage));
-    transform: scaleX(0);
-    transition: transform 0.3s ease;
-}
-.metric-wrap:hover::after {
-    transform: scaleX(1);
-}
-.metric-wrap:hover {
-    box-shadow: var(--shadow-md);
-    transform: translateY(-3px);
-}
-.metric-num {
-    font-family: 'Playfair Display', serif;
-    font-size: 3rem;
-    font-weight: 900;
-    color: var(--ink);
+.metric-big {
+    font-size: 3.2rem;
+    font-weight: 800;
+    color: var(--black);
     line-height: 1;
+    letter-spacing: -0.03em;
 }
-.metric-lbl {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.7rem;
-    color: var(--slate);
-    margin-top: 0.5rem;
-    letter-spacing: 0.1em;
+.metric-label {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--gray-1);
+    margin-top: 0.3rem;
     text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
-/* ── Section titles ── */
-.section-label {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.3rem;
-    font-weight: 700;
-    color: var(--ink);
-    margin: 2.5rem 0 1rem 0;
-    padding-bottom: 0.6rem;
-    border-bottom: 2px solid var(--ink);
-    display: inline-block;
-}
-
-/* ── Score rows ── */
-.score-row {
+/* ═══════════════════════════════════════════
+   SCORE ROWS
+   ═══════════════════════════════════════════ */
+.score-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: #fff;
-    border: 1px solid var(--mist);
-    border-radius: var(--radius-sm);
-    padding: 0.9rem 1.3rem;
-    margin-bottom: 0.5rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--gray-5);
     transition: all 0.2s ease;
 }
-.score-row:hover {
-    box-shadow: var(--shadow-sm);
-    transform: translateX(4px);
+.score-item:last-child { border-bottom: none; }
+.score-item:hover {
+    padding-left: 8px;
 }
 
-/* ── Buttons ── */
+/* ═══════════════════════════════════════════
+   BUTTONS — Apple blue pill
+   ═══════════════════════════════════════════ */
 .stButton > button {
-    border-radius: var(--radius-sm) !important;
-    font-family: 'Source Sans 3', sans-serif !important;
-    font-weight: 600 !important;
-    font-size: 0.9rem !important;
-    padding: 0.65rem 1.8rem !important;
-    transition: all 0.25s ease !important;
-    border: none !important;
-    letter-spacing: 0.02em !important;
+    border-radius: 980px !important;
+    font-weight: 500 !important;
+    font-size: 0.88rem !important;
+    padding: 0.6rem 1.6rem !important;
+    transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1) !important;
+    letter-spacing: 0.01em !important;
 }
 .stButton > button[kind="primary"] {
-    background: var(--accent) !important;
+    background: var(--blue) !important;
     color: #fff !important;
-    box-shadow: 0 2px 8px rgba(232,93,38,0.3) !important;
+    border: none !important;
 }
 .stButton > button[kind="primary"]:hover {
-    background: var(--accent-glow) !important;
-    box-shadow: 0 4px 16px rgba(232,93,38,0.4) !important;
-    transform: translateY(-2px) !important;
+    background: var(--blue-hover) !important;
+    box-shadow: 0 2px 12px rgba(0,119,237,0.35) !important;
+    transform: scale(1.02) !important;
 }
 .stButton > button:not([kind="primary"]) {
-    background: #fff !important;
-    color: var(--ink) !important;
-    border: 1px solid var(--mist) !important;
+    background: transparent !important;
+    color: var(--blue) !important;
+    border: 1px solid var(--gray-4) !important;
 }
 .stButton > button:not([kind="primary"]):hover {
-    border-color: var(--accent) !important;
-    color: var(--accent) !important;
-    transform: translateY(-1px) !important;
+    background: var(--blue-bg) !important;
+    border-color: var(--blue) !important;
 }
 
-/* ── Text areas ── */
+/* ═══════════════════════════════════════════
+   INPUTS — Apple form fields
+   ═══════════════════════════════════════════ */
 .stTextArea textarea {
-    border-radius: var(--radius-sm) !important;
-    border: 1px solid var(--mist) !important;
-    font-family: 'JetBrains Mono', monospace !important;
-    font-size: 0.9rem !important;
-    background: var(--code-bg) !important;
-    color: var(--code-fg) !important;
-    transition: border-color 0.2s ease !important;
+    border-radius: 12px !important;
+    border: 1px solid var(--gray-4) !important;
+    font-family: 'SF Mono', 'Menlo', 'Consolas', monospace !important;
+    font-size: 0.88rem !important;
+    background: var(--gray-5) !important;
+    color: var(--black) !important;
+    transition: all 0.2s ease !important;
+    padding: 1rem !important;
 }
 .stTextArea textarea:focus {
-    border-color: var(--accent) !important;
-    box-shadow: 0 0 0 3px rgba(232,93,38,0.1) !important;
+    border-color: var(--blue) !important;
+    background: var(--white) !important;
+    box-shadow: 0 0 0 4px rgba(0,119,237,0.12) !important;
+    outline: none !important;
 }
 
-/* ── Select boxes ── */
+/* ── Select ── */
 .stSelectbox label {
-    font-family: 'JetBrains Mono', monospace !important;
-    font-size: 0.75rem !important;
+    font-size: 0.72rem !important;
     font-weight: 600 !important;
-    letter-spacing: 0.1em !important;
+    color: var(--gray-1) !important;
     text-transform: uppercase !important;
-    color: var(--slate) !important;
+    letter-spacing: 0.08em !important;
 }
 .stSelectbox div[data-baseweb="select"] {
-    border-radius: var(--radius-sm) !important;
-    border-color: var(--mist) !important;
+    border-radius: 10px !important;
+    border-color: var(--gray-4) !important;
 }
 
-/* ── Alerts ── */
+/* ═══════════════════════════════════════════
+   ALERTS — Apple system colors
+   ═══════════════════════════════════════════ */
 .stSuccess, .stError, .stWarning, .stInfo {
-    border-radius: var(--radius-sm) !important;
-    border-left-width: 4px !important;
+    border-radius: 12px !important;
+    border: none !important;
+}
+.stSuccess { background: var(--green-bg) !important; }
+.stError { background: var(--red-bg) !important; }
+.stWarning { background: var(--orange-bg) !important; }
+
+/* ═══════════════════════════════════════════
+   DIVIDER — Apple thin rule
+   ═══════════════════════════════════════════ */
+.apple-hr {
+    height: 1px;
+    background: var(--gray-4);
+    border: none;
+    margin: 2rem 0;
 }
 
-/* ── Expander ── */
+/* ═══════════════════════════════════════════
+   EXPANDER
+   ═══════════════════════════════════════════ */
 .streamlit-expanderHeader {
-    font-family: 'Source Sans 3', sans-serif !important;
-    font-weight: 600 !important;
-}
-
-/* ── Main content area ── */
-.main .block-container {
-    padding-top: 2rem !important;
-    max-width: 900px !important;
+    font-weight: 500 !important;
+    border-radius: 12px !important;
 }
 </style>
 """
@@ -449,16 +427,18 @@ def welcome_page():
     st.markdown(
         """
         <div class="hero">
-            <div class="hero-label">Interactive Python Tutorial</div>
-            <h1 class="hero-title">Welcome to<br><em>Python</em></h1>
-            <div class="hero-divider"></div>
+            <div class="hero-eyebrow">Interactive Python Tutorial</div>
+            <h1 class="hero-title">
+                Welcome to<br>
+                <span class="hero-title-gradient">Python.</span>
+            </h1>
             <p class="hero-subtitle">交互式学习，从这里开始</p>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-    col1, col2, col3 = st.columns([2, 1, 2])
+    col1, col2, col3 = st.columns([3, 2, 3])
     with col2:
         if st.button("开始学习", use_container_width=True, type="primary"):
             st.session_state["current_page"] = "学习"
@@ -469,7 +449,8 @@ def lesson_page():
     _inject_css()
 
     st.markdown(
-        '<div class="page-header"><h1>学习</h1><p>选择课程和章节，开始你的 Python 之旅</p></div>',
+        '<h1 class="page-title">学习</h1>'
+        '<p class="page-desc">选择课程和章节，开始你的 Python 之旅。</p>',
         unsafe_allow_html=True,
     )
 
@@ -488,7 +469,7 @@ def lesson_page():
         return
 
     st.markdown(
-        '<p style="color:var(--slate);font-size:0.95rem;margin-bottom:1rem;font-style:italic;">{}</p>'.format(
+        '<p style="color:var(--gray-2);font-size:0.92rem;margin-bottom:1.5rem;">{}</p>'.format(
             course["description"]
         ),
         unsafe_allow_html=True,
@@ -531,7 +512,8 @@ def practice_page():
     _inject_css()
 
     st.markdown(
-        '<div class="page-header"><h1>练习</h1><p>动手编写代码，检验学习成果</p></div>',
+        '<h1 class="page-title">练习</h1>'
+        '<p class="page-desc">动手编写代码，检验学习成果。</p>',
         unsafe_allow_html=True,
     )
 
@@ -562,7 +544,10 @@ def practice_page():
     grading_result = st.session_state.get("grading_result_{}".format(exercise_id))
     exercise_card(exercise, grading_result)
 
-    st.markdown('<div class="code-label">代码编辑器</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="code-section-label">代码编辑器</div>',
+        unsafe_allow_html=True,
+    )
     starter = exercise.get("starter_code", "# 在这里写你的代码\n")
     user_code = code_editor(
         initial_code=starter,
@@ -601,8 +586,11 @@ def practice_page():
     diag_key = "needs_diagnosis_{}".format(exercise_id)
     if diag_key in st.session_state and "llm_client" in st.session_state:
         diag = st.session_state[diag_key]
-        st.markdown("---")
-        st.markdown('<div class="code-label">AI 诊断</div>', unsafe_allow_html=True)
+        st.markdown('<hr class="apple-hr">', unsafe_allow_html=True)
+        st.markdown(
+            '<div class="code-section-label">AI 诊断</div>',
+            unsafe_allow_html=True,
+        )
         with st.spinner("正在分析错误..."):
             try:
                 llm = st.session_state["llm_client"]
@@ -619,7 +607,8 @@ def ask_page():
     _inject_css()
 
     st.markdown(
-        '<div class="page-header"><h1>提问</h1><p>粘贴代码，AI 为你解答疑惑</p></div>',
+        '<h1 class="page-title">提问</h1>'
+        '<p class="page-desc">粘贴代码，AI 用中文为你解答。</p>',
         unsafe_allow_html=True,
     )
 
@@ -627,7 +616,7 @@ def ask_page():
         st.warning("请先配置 ANTHROPIC_API_KEY 环境变量")
         return
 
-    st.markdown('<div class="content-card">', unsafe_allow_html=True)
+    st.markdown('<div class="apple-card">', unsafe_allow_html=True)
     user_code = st.text_area(
         "粘贴你的 Python 代码",
         value="# 在这里粘贴你的代码\n",
@@ -648,8 +637,11 @@ def ask_page():
         with st.spinner("AI 正在思考..."):
             try:
                 llm = st.session_state["llm_client"]
-                st.markdown('<div class="code-label">回答</div>', unsafe_allow_html=True)
-                st.markdown('<div class="content-card">', unsafe_allow_html=True)
+                st.markdown(
+                    '<div class="code-section-label" style="margin-top:2rem;">回答</div>',
+                    unsafe_allow_html=True,
+                )
+                st.markdown('<div class="apple-card">', unsafe_allow_html=True)
                 st.write_stream(
                     llm.answer_question_stream(user_code, user_question)
                 )
@@ -662,7 +654,8 @@ def dashboard_page():
     _inject_css()
 
     st.markdown(
-        '<div class="page-header"><h1>学习进度</h1><p>回顾你的学习旅程</p></div>',
+        '<h1 class="page-title">学习进度</h1>'
+        '<p class="page-desc">回顾你的学习旅程。</p>',
         unsafe_allow_html=True,
     )
 
@@ -677,40 +670,50 @@ def dashboard_page():
     for col, value, label in metrics:
         with col:
             st.markdown(
-                '<div class="metric-wrap">'
-                '<div class="metric-num">{}</div>'
-                '<div class="metric-lbl">{}</div>'
+                '<div class="metric-block">'
+                '<div class="metric-big">{}</div>'
+                '<div class="metric-label">{}</div>'
                 '</div>'.format(value, label),
                 unsafe_allow_html=True,
             )
 
     if progress.get("completed_lessons"):
-        st.markdown('<div class="section-label">已完成的课程</div>', unsafe_allow_html=True)
+        st.markdown(
+            '<hr class="apple-hr">'
+            '<div class="section-title">已完成的课程</div>',
+            unsafe_allow_html=True,
+        )
         for lid in progress["completed_lessons"]:
             st.markdown(
-                '<div class="content-card" style="padding:0.8rem 1.4rem;">&#10003; {}</div>'.format(lid),
+                '<div class="apple-card" style="padding:0.8rem 1.5rem;display:flex;align-items:center;gap:0.6rem;">'
+                '<span style="color:var(--green);font-size:1.1rem;">&#10003;</span> {}</div>'.format(lid),
                 unsafe_allow_html=True,
             )
 
     scores = progress.get("exercise_scores", {})
     if scores:
-        st.markdown('<div class="section-label">练习成绩</div>', unsafe_allow_html=True)
+        st.markdown(
+            '<hr class="apple-hr">'
+            '<div class="section-title">练习成绩</div>',
+            unsafe_allow_html=True,
+        )
         for ex_id, info in scores.items():
             passed = info["passed"] == info["total"]
-            badge_class = "badge-easy" if passed else "badge-hard"
+            badge_cls = "green" if passed else "red"
             status = "通过" if passed else "未通过"
             st.markdown(
-                '<div class="score-row">'
-                '<strong>{}</strong>'
-                '<span>{} / {} <span class="badge {}">{}</span></span>'
-                '</div>'.format(ex_id, info["passed"], info["total"], badge_class, status),
+                '<div class="score-item">'
+                '<span style="font-weight:600;">{}</span>'
+                '<span>{} / {} <span class="apple-badge {}">{}</span></span>'
+                '</div>'.format(ex_id, info["passed"], info["total"], badge_cls, status),
                 unsafe_allow_html=True,
             )
 
     mistakes = load_mistakes()
     if mistakes:
         st.markdown(
-            '<div class="section-label">错题记录 (最近 10 条)</div>',
+            '<hr class="apple-hr">'
+            '<div class="section-title">错题记录 (最近 10 条)</div>',
             unsafe_allow_html=True,
         )
         for m in reversed(mistakes[-10:]):

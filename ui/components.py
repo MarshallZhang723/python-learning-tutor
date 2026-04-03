@@ -35,10 +35,10 @@ def output_panel(result):
 
 def lesson_card(lesson):
     """Render a lesson card with title, explanation, code example, and key points."""
-    st.markdown('<div class="content-card">', unsafe_allow_html=True)
+    st.markdown('<div class="apple-card">', unsafe_allow_html=True)
 
     st.markdown(
-        '<h2>{}</h2>'.format(lesson["title"]),
+        '<h2 style="font-size:1.6rem;font-weight:700;color:#1d1d1f;margin:0 0 0.8rem 0;">{}</h2>'.format(lesson["title"]),
         unsafe_allow_html=True,
     )
 
@@ -46,10 +46,11 @@ def lesson_card(lesson):
 
     if lesson.get("key_points"):
         items = "".join(
-            '<li>{}</li>'.format(p) for p in lesson["key_points"]
+            '<li><span class="dot"></span>{}</li>'.format(p)
+            for p in lesson["key_points"]
         )
         st.markdown(
-            '<ul class="key-points">{}</ul>'.format(items),
+            '<ul class="apple-points">{}</ul>'.format(items),
             unsafe_allow_html=True,
         )
 
@@ -58,7 +59,7 @@ def lesson_card(lesson):
     example_code = ""
     if lesson.get("code_example"):
         st.markdown(
-            '<div class="code-label">示例代码</div>',
+            '<div style="font-size:0.75rem;font-weight:600;color:#86868b;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.4rem;">示例代码</div>',
             unsafe_allow_html=True,
         )
         st.code(lesson["code_example"], language="python")
@@ -71,19 +72,19 @@ def exercise_card(exercise, grading_result=None):
     """Render an exercise card with description and difficulty."""
     difficulty = exercise.get("difficulty", "medium")
     difficulty_map = {
-        "easy": ("简单", "badge-easy"),
-        "medium": ("中等", "badge-medium"),
-        "hard": ("困难", "badge-hard"),
+        "easy": ("简单", "green"),
+        "medium": ("中等", "orange"),
+        "hard": ("困难", "red"),
     }
-    label, badge_class = difficulty_map.get(difficulty, ("中等", "badge-medium"))
+    label, badge_class = difficulty_map.get(difficulty, ("中等", "orange"))
 
     st.markdown(
-        '<div class="content-card">'
+        '<div class="apple-card">'
         '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem;">'
-        '<h2 style="margin:0;">{}</h2>'
-        '<span class="badge {}">{}</span>'
+        '<h2 style="margin:0;font-size:1.3rem;font-weight:700;color:#1d1d1f;">{}</h2>'
+        '<span class="apple-badge {}">{}</span>'
         '</div>'
-        '<p>{}</p>'
+        '<p style="color:#6e6e73;margin:0;">{}</p>'
         '</div>'.format(exercise["title"], badge_class, label, exercise["description"]),
         unsafe_allow_html=True,
     )
