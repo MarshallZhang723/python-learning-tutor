@@ -9,7 +9,7 @@ def code_editor(initial_code="", key=None, height=200, editable=True):
             value=initial_code,
             height=height,
             key=key,
-            help="在这里编写你的 Python 代码",
+            label_visibility="collapsed",
         )
     else:
         code = initial_code
@@ -35,36 +35,30 @@ def output_panel(result):
 
 def lesson_card(lesson):
     """Render a lesson card with title, explanation, code example, and key points."""
-    st.markdown(
-        '<div class="card">',
-        unsafe_allow_html=True,
-    )
+    st.markdown('<div class="content-card">', unsafe_allow_html=True)
 
     st.markdown(
-        '<h2 style="font-size:1.5rem;font-weight:700;color:#1d1d1f;margin-top:0;">{}</h2>'.format(
-            lesson["title"]
-        ),
+        '<h2>{}</h2>'.format(lesson["title"]),
         unsafe_allow_html=True,
     )
 
     st.markdown(lesson["explanation"])
 
     if lesson.get("key_points"):
-        st.markdown('<div style="margin-top:0.8rem;">', unsafe_allow_html=True)
-        for point in lesson["key_points"]:
-            st.markdown(
-                '<div class="key-point">{}</div>'.format(point),
-                unsafe_allow_html=True,
-            )
-        st.markdown('</div>', unsafe_allow_html=True)
+        items = "".join(
+            '<li>{}</li>'.format(p) for p in lesson["key_points"]
+        )
+        st.markdown(
+            '<ul class="key-points">{}</ul>'.format(items),
+            unsafe_allow_html=True,
+        )
 
     st.markdown('</div>', unsafe_allow_html=True)
 
     example_code = ""
     if lesson.get("code_example"):
         st.markdown(
-            '<p style="font-weight:600;color:#1d1d1f;margin-top:1rem;margin-bottom:0.3rem;">'
-            '示例代码</p>',
+            '<div class="code-label">示例代码</div>',
             unsafe_allow_html=True,
         )
         st.code(lesson["code_example"], language="python")
@@ -84,18 +78,17 @@ def exercise_card(exercise, grading_result=None):
     label, badge_class = difficulty_map.get(difficulty, ("中等", "badge-medium"))
 
     st.markdown(
-        '<div class="card">'
-        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">'
-        '<h2 style="font-size:1.5rem;font-weight:700;color:#1d1d1f;margin:0;">{}</h2>'
+        '<div class="content-card">'
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem;">'
+        '<h2 style="margin:0;">{}</h2>'
         '<span class="badge {}">{}</span>'
         '</div>'
-        '<p style="color:#333;line-height:1.7;">{}</p>'
+        '<p>{}</p>'
         '</div>'.format(exercise["title"], badge_class, label, exercise["description"]),
         unsafe_allow_html=True,
     )
 
     if grading_result:
-        st.markdown("---")
         if grading_result.all_passed:
             st.success(
                 "所有测试通过！({}/{})".format(
